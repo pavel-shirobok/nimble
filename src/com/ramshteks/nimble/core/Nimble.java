@@ -58,7 +58,7 @@ public class Nimble implements Runnable {
 				}
 
 				for(EventIO.EventReceiver receiver: receivers){
-					if(receiver.compatibleInput(event.getCoreEventType())){
+					if(receiver.compatibleInput(event.eventType())){
 						receiver.pushEvent(event);
 					}
 				}
@@ -66,14 +66,7 @@ public class Nimble implements Runnable {
 		}
 	}
 
-	public CoreEventType[] getAcceptableEventsType() {
-		return new CoreEventType[]{
-				CoreEventType.CloseConnection,
-				CoreEventType.NewConnection,
-				CoreEventType.ReceiveTCPPacket,
-				CoreEventType.ReceiveUDPPacket,
-				CoreEventType.SendTCPPacket,
-				CoreEventType.SendUDPPacket
-		};
+	public String[] getAcceptableEventsType() {
+		return new String[]{};
 	}
 }

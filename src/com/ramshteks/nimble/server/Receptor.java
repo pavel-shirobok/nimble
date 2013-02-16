@@ -1,6 +1,6 @@
 package com.ramshteks.nimble.server;
 
-import com.ramshteks.nimble.core.CoreEventType;
+import com.ramshteks.nimble.core.EventIO;
 import com.ramshteks.nimble.core.EventStack;
 
 import java.io.IOException;
@@ -11,9 +11,9 @@ import java.net.InetAddress;
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
-public abstract class Receptor extends EventStack {
+public abstract class Receptor extends EventStack implements EventIO.EventFull {
 
-	public Receptor(CoreEventType[] acceptable) {
+	public Receptor(String[] acceptable) {
 		super(acceptable);
 	}
 

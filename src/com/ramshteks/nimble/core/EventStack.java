@@ -9,9 +9,9 @@ import java.util.LinkedList;
  */
 public class EventStack implements EventIO.EventSender, EventIO.EventReceiver {
 	private LinkedList<Event> events;
-	private CoreEventType[] acceptable;
+	private String[] acceptable;
 
-	public EventStack(CoreEventType[] acceptable){
+	public EventStack(String[] acceptable){
 		this.acceptable = acceptable;
 		events = new LinkedList<Event>();
 	}
@@ -21,9 +21,9 @@ public class EventStack implements EventIO.EventSender, EventIO.EventReceiver {
 	}
 
 	@Override
-	public boolean compatibleInput(CoreEventType coreEventType) {
-		for(CoreEventType type : acceptable){
-			if(type == coreEventType)return true;
+	public boolean compatibleInput(String coreEventType) {
+		for(String type : acceptable){
+			if(type.equals(coreEventType))return true;
 		}
 		return false;
 	}

@@ -1,26 +1,13 @@
 package com.ramshteks.nimble.core;
 
-/**
- * ...
- *
- * @author Pavel Shirobok (ramshteks@gmail.com)
- */
-public abstract class Event{
-	public static final String PACKET = "packet";
+public class Event{
 
-	private CoreEventType coreEventType;
-	private final String eventType;
-
-	public Event(CoreEventType coreEventType, String eventType){
-		this.coreEventType = coreEventType;
+	private String eventType;
+	public Event(String eventType){
 		this.eventType = eventType;
 	}
 
-	public CoreEventType getCoreEventType() {
-		return coreEventType;
-	}
-
-	public String getEventType() {
+	public String eventType() {
 		return eventType;
 	}
 }

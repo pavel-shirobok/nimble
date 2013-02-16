@@ -1,11 +1,13 @@
 package com.ramshteks.nimble.tcp;
 
 import com.ramshteks.nimble.server.Receptor;
-import com.ramshteks.nimble.tcp.events.ConnectionEvent;
-import com.ramshteks.nimble.core.CoreEventType;
+import com.ramshteks.nimble.tcp.events.TcpConnectionEvent;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 /**
  * ...
@@ -19,7 +21,7 @@ public class TcpReceptor extends Receptor implements Runnable {
 	private Thread thread;
 
 	public TcpReceptor() {
-		super(new CoreEventType[]{});
+		super(new String[]{});
 	}
 
 	@Override
@@ -67,7 +69,7 @@ public class TcpReceptor extends Receptor implements Runnable {
 			}
 
 			if(null != acceptedSocket){
-				pushEvent(new ConnectionEvent(CoreEventType.NewConnection, 0, acceptedSocket));
+				pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, acceptedSocket));
 			}
 		}
 	}

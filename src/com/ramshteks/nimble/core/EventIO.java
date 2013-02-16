@@ -1,17 +1,12 @@
 package com.ramshteks.nimble.core;
 
-/**
- * ...
- *
- * @author Pavel Shirobok (ramshteks@gmail.com)
- */
 public interface EventIO{
 
 	public static interface EventFull extends EventReceiver, EventSender{}
 
 	public static interface EventReceiver {
 		void pushEvent(Event event);
-		boolean compatibleInput(CoreEventType coreEventType);
+		boolean compatibleInput(String eventType);
 	}
 
 	public static interface EventSender {
