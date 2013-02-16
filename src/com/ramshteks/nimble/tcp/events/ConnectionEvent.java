@@ -1,7 +1,7 @@
-package com.ramshteks.nimble.core.events;
+package com.ramshteks.nimble.tcp.events;
 
-import com.ramshteks.nimble.event_machine.CoreEventType;
-import com.ramshteks.nimble.event_machine.Event;
+import com.ramshteks.nimble.core.CoreEventType;
+import com.ramshteks.nimble.core.Event;
 
 import java.net.Socket;
 
@@ -20,11 +20,11 @@ public class ConnectionEvent extends Event {
 		this.socket = socket;
 	}
 
-	public int getConnection_id() {
+	public int connection_id() {
 		return connection_id;
 	}
 
-	public Socket getSocket() {
+	public Socket socket() {
 		return socket;
 	}
 }

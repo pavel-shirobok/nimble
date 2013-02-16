@@ -1,4 +1,5 @@
-import com.ramshteks.nimble.core.TcpAccepter;
+import com.ramshteks.nimble.core.Nimble;
+import com.ramshteks.nimble.tcp.TcpReceptor;
 
 import java.net.InetAddress;
 import java.util.Iterator;
@@ -12,41 +13,8 @@ public class Main {
 	public static void main(String[] args){
 		System.out.print("Hello world");
 
-		TcpAccepter accepter = new TcpAccepter();
-		try{
-			accepter.startBinding(InetAddress.getLocalHost(), 2305);
-		}catch (Exception e){
-			System.out.println(e.getMessage());
-		}
-	}
-
-	public static class TestIterable implements Iterable<Integer>, Iterator<Integer>{
-
-		private int i = 0;
-
-		public TestIterable() {
-
-		}
-
-		@Override
-		public Iterator<Integer> iterator() {
-			i = 0;
-			return this;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return i < 10;
-		}
-
-		@Override
-		public Integer next() {
-			return i++;
-		}
-
-		@Override
-		public void remove() {
-		}
+		Nimble nimble = new Nimble();
+		nimble.start();
 	}
 
 }

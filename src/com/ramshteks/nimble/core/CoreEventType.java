@@ -1,4 +1,4 @@
-package com.ramshteks.nimble.event_machine;
+package com.ramshteks.nimble.core;
 
 public enum CoreEventType{
 

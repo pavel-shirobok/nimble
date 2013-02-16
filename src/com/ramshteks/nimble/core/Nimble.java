@@ -1,33 +1,79 @@
 package com.ramshteks.nimble.core;
 
-import com.ramshteks.nimble.event_machine.*;
+import java.util.LinkedList;
 
 /**
  * ...
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
-public class Nimble {
+public class Nimble implements Runnable {
 
-	public static final class RawPacket extends Event {
-		private byte[] bytes;
+	private LinkedList<EventIO.EventReceiver> receivers;
+	private LinkedList<EventIO.EventSender> senders;
 
-		public RawPacket(CoreEventType eventType, byte[] bytes) {
-			super(eventType, PACKET);
-			this.bytes = bytes;
-		}
+	private Thread mainThread;
+	private final EventStack serverInputEventStream;
 
-		byte[] getData(){
-			return  bytes;
+	public Nimble(){
+		receivers = new LinkedList<EventIO.EventReceiver>();
+		senders = new LinkedList<EventIO.EventSender>();
+		serverInputEventStream = new EventStack(getAcceptableEventsType());
+	}
+
+	public void addReceiverPlugin(EventIO.EventReceiver receiver){
+		receivers.addLast(receiver);
+	}
+
+	public void addSenderPlugin(EventIO.EventSender sender){
+		senders.addLast(sender);
+	}
+
+	public void addFullEventPlugin(EventIO.EventFull eventFull){
+		addSenderPlugin(eventFull);
+		addReceiverPlugin(eventFull);
+	}
+
+	public void start(){
+		mainThread = new Thread(this);
+		mainThread.start();
+	}
+
+	public void stop(){
+		//TODO: make stop thread
+	}
+
+	@Override
+	public void run() {
+		//main server loop
+		Event event;
+		while (true){
+			if(serverInputEventStream.hasEventToHandle()){
+				event = serverInputEventStream.nextEvent();
+
+				for(EventIO.EventSender sender: senders){
+					if(sender.hasEventToHandle()){
+						serverInputEventStream.pushEvent(sender.nextEvent());
+					}
+				}
+
+				for(EventIO.EventReceiver receiver: receivers){
+					if(receiver.compatibleInput(event.getCoreEventType())){
+						receiver.pushEvent(event);
+					}
+				}
+			}
 		}
 	}
 
-	public abstract class PacketProcessor
-	{
-		public abstract void addToPacking(RawPacket packet);
-		public abstract void addToUnpacking(byte[] rawData);
-
-		public abstract boolean doPacking();
-		public abstract boolean doUnpacking();
+	public CoreEventType[] getAcceptableEventsType() {
+		return new CoreEventType[]{
+				CoreEventType.CloseConnection,
+				CoreEventType.NewConnection,
+				CoreEventType.ReceiveTCPPacket,
+				CoreEventType.ReceiveUDPPacket,
+				CoreEventType.SendTCPPacket,
+				CoreEventType.SendUDPPacket
+		};
 	}
 }

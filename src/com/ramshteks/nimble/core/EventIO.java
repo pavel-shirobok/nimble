@@ -1,4 +1,4 @@
-package com.ramshteks.nimble.event_machine;
+package com.ramshteks.nimble.core;
 
 /**
  * ...
@@ -6,6 +6,8 @@ package com.ramshteks.nimble.event_machine;
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
 public interface EventIO{
+
+	public static interface EventFull extends EventReceiver, EventSender{}
 
 	public static interface EventReceiver {
 		void pushEvent(Event event);
@@ -16,4 +18,5 @@ public interface EventIO{
 		boolean hasEventToHandle();
 		Event nextEvent();
 	}
+
 }
