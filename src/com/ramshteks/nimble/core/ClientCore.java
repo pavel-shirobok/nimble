@@ -1,3 +1,4 @@
+/*
 package com.ramshteks.nimble.core;
 
 public class ClientCore{
@@ -21,3 +22,4 @@ public class ClientCore{
 		void onIOError();
 	}
 }
+*/

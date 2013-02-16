@@ -17,7 +17,8 @@
  *
  * Contact information:
  * email: ramshteks@gmail.com
- */
+ *//*
+
 package com.ramshteks.nimble;
 import com.ramshteks.nimble.core.Accepter;
 import com.ramshteks.nimble.core.Connection;
@@ -33,54 +34,74 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class SupaDupa {
-	/**
+	*/
+/**
 	 * Generator unique ids of connection
-	 */
+	 *//*
+
 	private IDGenerator cids;
 
-	/**
+	*/
+/**
 	 * List of socket wait of adding to core
-	 */
+	 *//*
+
 	private final List<Socket> socketRequests;
 
-	/**
+	*/
+/**
 	 * List of active connections
-	 */
+	 *//*
+
 	private Hashtable<Integer, Connection> connections;
 
-	/**
+	*/
+/**
 	 * Core data
-	 */
+	 *//*
+
 	private Core.ICoreData coreData;
 
-	/**
+	*/
+/**
 	 * Business logic data
-	 */
+	 *//*
+
 	private Core.IBusinessLogicData business;
 
-	/**
+	*/
+/**
 	 * Accepter event handler
-	 */
+	 *//*
+
 	private Core.IAccepterEvent accepterEvent;
 
-	/**
+	*/
+/**
 	 * Connection's event handler
-	 */
+	 *//*
+
 	private Core.IConnectionEvent connectionEvent;
 
-	/**
+	*/
+/**
 	 * Implementation of logic
-	 */
+	 *//*
+
 	private Core.ILogic logic;
 
-	/**
+	*/
+/**
 	 * Implementation of logger
-	 */
+	 *//*
+
 	private Core.ILogger logger;
 
-	/**
+	*/
+/**
 	 * Constructor
-	 */
+	 *//*
+
 	public SupaDupa() {
 		cids = new IDGenerator();
 		socketRequests = new LinkedList<Socket>();
@@ -143,7 +164,8 @@ public final class SupaDupa {
 
 	}
 
-	/**
+	*/
+/**
 	 * Starting server
 	 *
 	 * @param netDataIn net data
@@ -151,7 +173,8 @@ public final class SupaDupa {
 	 * @param business  logic and logger
 	 * @throws java.io.IOException		  when... mmm, I'm confused =(
 	 * @throws NullPointerException when one of the start arguments is <code>null</code>
-	 */
+	 *//*
+
 	public void start(Core.INetData netDataIn, Core.ICoreData coreData, Core.IBusinessLogicData business) throws IOException, NullPointerException {
 
 		if (netDataIn == null) throw new NullPointerException("Core.INetData == null");
@@ -213,9 +236,11 @@ public final class SupaDupa {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * Checking server for new event
-	 */
+	 *//*
+
 	public void check() {
 		checkNewSockets();
 
@@ -240,9 +265,11 @@ public final class SupaDupa {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * Checking queue of new sockets
-	 */
+	 *//*
+
 	private void checkNewSockets() {
 		Socket socket;
 		synchronized (socketRequests) {
@@ -254,11 +281,13 @@ public final class SupaDupa {
 		createConnection(socket);
 	}
 
-	/**
+	*/
+/**
 	 * Creating new connection from new socket
 	 *
 	 * @param socket socket instance
-	 */
+	 *//*
+
 	private void createConnection(Socket socket) {
 		int newID = cids.getNextID();
 		//logger.log("NEW CID "+newID);
@@ -282,3 +311,4 @@ public final class SupaDupa {
 	}
 
 }
+*/

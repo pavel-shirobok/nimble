@@ -1,16 +1,21 @@
+/*
 package com.ramshteks.nimble;
 
+*/
 /**
  * ...
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
- */
+ *//*
+
 public class NimbleExt {
 
-	/**
+	*/
+/**
 	 * Enumeration of core oriented event types.
 	 * Each type have priority, then low value , then low priority
-	 */
+	 *//*
+
 	public static enum CoreEventType{
 		CoreCommand(3),
 		CorePacket(2),
@@ -92,3 +97,4 @@ public class NimbleExt {
 	}
 
 }
+*/

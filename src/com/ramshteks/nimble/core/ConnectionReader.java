@@ -1,3 +1,4 @@
+/*
 package com.ramshteks.nimble.core;
 
 import java.net.Socket;
@@ -17,14 +18,16 @@ public class ConnectionReader implements Runnable{
 		this.coreData = coreData;
 		this.socket = socket;
 		//log.log("listener"+(listener==null));
-		/*try{
+		*/
+/*try{
 			connection = new Connection(0, socket, coreData, log, true);
 			connection.setConnectionEvent(listener);
 		}catch (Exception conn_ex){
 			log.log("Connection create", conn_ex);
 			listener.onConnectionError(0, SDError.ACCEPT_IO);
 			throw conn_ex;
-		}*/
+		}*//*
+
 
 	}
 
@@ -72,3 +75,4 @@ public class ConnectionReader implements Runnable{
 	}
 
 }
+*/

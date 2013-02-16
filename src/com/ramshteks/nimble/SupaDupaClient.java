@@ -1,3 +1,4 @@
+/*
 package com.ramshteks.nimble;
 
 
@@ -8,7 +9,7 @@ import com.ramshteks.nimble.core.SDError;
 
 import java.net.Socket;
 
-public class SupaDupaClient implements Runnable{
+public class SupaDupaClient implements Runnable {
 	private ClientCore.ClientListener clientListener;
 	private ClientCore.ClientLogicListener clientLogic;
 
@@ -143,3 +144,4 @@ public class SupaDupaClient implements Runnable{
 		}
 	}
 }
+*/
