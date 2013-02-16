@@ -1,7 +1,8 @@
 package com.ramshteks.nimble.core;
 
-import com.ramshteks.nimble.core.*;
-import com.ramshteks.nimble.event_machine.*;
+import com.ramshteks.nimble.core.events.ConnectionEvent;
+import com.ramshteks.nimble.event_machine.CoreEventType;
+import com.ramshteks.nimble.event_machine.EventIO;
 
 import java.io.*;
 import java.net.*;
@@ -11,10 +12,15 @@ import java.net.*;
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
-public class TcpAccepter extends Accepter implements Runnable {
+public class TcpAccepter extends Receptor implements Runnable {
+
 	private boolean isBinded = false;
 	private ServerSocket socket;
 	private Thread thread;
+
+	public TcpAccepter() {
+
+	}
 
 	@Override
 	public void startBinding(InetAddress bindAddress, int port) throws IOException {
@@ -44,13 +50,8 @@ public class TcpAccepter extends Accepter implements Runnable {
 	}
 
 	@Override
-	public synchronized void captureEvent(Event event) {
-
-	}
-
-	@Override
 	public void run() {
-		Socket acceptedSocket = null;
+		Socket acceptedSocket;
 		while (!socket.isClosed()) {
 			try {
 				acceptedSocket = socket.accept();
@@ -63,6 +64,10 @@ public class TcpAccepter extends Accepter implements Runnable {
 			} catch (IOException ioEx) {
 				System.out.println("tcp accepter io error");
 				break;
+			}
+
+			if(null != acceptedSocket){
+				eventInput().pushEvent(new ConnectionEvent(CoreEventType.NewConnection, 0, acceptedSocket));
 			}
 		}
 	}

@@ -22,7 +22,7 @@ public class Nimble {
 		}
 	}
 
-	public abstract class PacketProcessor extends LinkedListBasedEventDispatcher
+	public abstract class PacketProcessor
 	{
 		public abstract void addToPacking(RawPacket packet);
 		public abstract void addToUnpacking(byte[] rawData);

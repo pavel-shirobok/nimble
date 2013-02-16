@@ -8,7 +8,7 @@ import static com.ramshteks.nimble.core.Nimble.*;
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
-public interface IPacketProcessor extends EventDispatcher {
+public interface IPacketProcessor {
 
 	void addToPacking(RawPacket packet);
 	void addToUnpacking(byte[] rawData);

@@ -1,4 +1,3 @@
-import com.ramshteks.nimble.core.IAccepter;
 import com.ramshteks.nimble.core.TcpAccepter;
 
 import java.net.InetAddress;
@@ -13,7 +12,7 @@ public class Main {
 	public static void main(String[] args){
 		System.out.print("Hello world");
 
-		IAccepter accepter = new TcpAccepter();
+		TcpAccepter accepter = new TcpAccepter();
 		try{
 			accepter.startBinding(InetAddress.getLocalHost(), 2305);
 		}catch (Exception e){
