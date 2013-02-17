@@ -1,27 +1,30 @@
 package com.ramshteks.nimble.tcp;
 
-import com.ramshteks.nimble.server.Receptor;
-import com.ramshteks.nimble.tcp.events.TcpConnectionEvent;
+import com.ramshteks.nimble.core.Event;
+import com.ramshteks.nimble.core.EventIO;
+import com.ramshteks.nimble.core.EventStack;
+import com.ramshteks.nimble.server.*;
+import com.ramshteks.nimble.tcp.events.*;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.io.*;
+import java.net.*;
 
 /**
  * ...
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
-public class TcpReceptor extends Receptor implements Runnable {
+public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable {
 
 	private boolean isBinded = false;
 	private ServerSocket socket;
 	private Thread thread;
+	private TcpConnectionsStack connectionsStack;
+	private EventStack eventStack;
 
-	public TcpReceptor() {
-		super(new String[]{});
+	public TcpReceptor(TcpConnectionsStack connectionsStack) {
+		this.connectionsStack = connectionsStack;
+		eventStack = new EventStack(new String[]{Event.LOOP_START});
 	}
 
 	@Override
@@ -52,6 +55,27 @@ public class TcpReceptor extends Receptor implements Runnable {
 	}
 
 	@Override
+	public void pushEvent(Event event) {
+
+		//check socket to disconnect &
+	}
+
+	@Override
+	public boolean compatibleInput(String eventType) {
+		return eventStack.compatibleInput(eventType);
+	}
+
+	@Override
+	public boolean hasEventToHandle() {
+		return eventStack.hasEventToHandle();
+	}
+
+	@Override
+	public Event nextEvent() {
+		return eventStack.nextEvent();
+	}
+
+	@Override
 	public void run() {
 		Socket acceptedSocket;
 		while (!socket.isClosed()) {
@@ -69,7 +93,8 @@ public class TcpReceptor extends Receptor implements Runnable {
 			}
 
 			if(null != acceptedSocket){
-				pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, acceptedSocket));
+				TcpConnectionInfo connectionInfo = connectionsStack.createConnection(acceptedSocket);
+				pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, connectionInfo));
 			}
 		}
 	}

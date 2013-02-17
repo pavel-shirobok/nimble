@@ -62,4 +62,16 @@ public class TcpConnection implements EventIO.EventFull {
 	public Event nextEvent() {
 		return outputEvents.nextEvent();
 	}
+
+	public Socket socket() {
+		return socket;
+	}
+
+	public int connection_id() {
+		return connection_id;
+	}
+
+	public void destroy() {
+		//TODO:
+	}
 }

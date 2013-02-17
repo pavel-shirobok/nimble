@@ -1,59 +1,74 @@
 package com.ramshteks.nimble.tcp;
 
-import com.ramshteks.nimble.core.*;
-import com.ramshteks.nimble.tcp.events.TcpConnectionEvent;
+import com.ramshteks.nimble.core.Nimble;
+import com.ramshteks.nimble.server.ServerUtils;
 
-import java.util.Hashtable;
+import java.net.Socket;
 
-/**
- * ...
- *
- * @author Pavel Shirobok (ramshteks@gmail.com)
- */
-public class TcpConnectionsStack implements EventIO.EventReceiver, EventIO.EventSender {
-	private Hashtable<Integer, TcpConnection> connections;
+public class TcpConnectionsStack {
+	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDRange idRange, Object o) {
 
+	}
 
-	@Override
-	public void pushEvent(Event event) {
-		String eventType = event.eventType();
-		TcpConnectionEvent tcpConnectionEvent;
+	public TcpConnectionInfo createConnection(Socket socket) {
 
-		if(equalEvent(eventType, TcpConnectionEvent.CONNECT)){
+		return null;
+	}
+	/*private Hashtable<Integer, TcpConnection> id2connections;
+	private Nimble nimble;
+	private ServerUtils.IDRange idRange;
+	private IPacketProcessorFactory packetProcessorFactory;
 
-			createConnection((TcpConnectionEvent)event);
-
-		}else if(equalEvent(eventType, TcpConnectionEvent.DISCONNECT)){
-
-			closeConnection((TcpConnectionEvent)event);
-		}
+	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDRange idRange, IPacketProcessorFactory packetProcessorFactory) {
+		this.nimble = nimble;
+		this.idRange = idRange;
+		this.packetProcessorFactory = packetProcessorFactory;
+		id2connections = new Hashtable<Integer, TcpConnection>();
 	}
 
 	private boolean equalEvent(String actual, String expect){
 		return actual.equals(expect);
-	}
+	}*/
 
-	private void createConnection(TcpConnectionEvent event) {
+	/*private void createConnection(TcpConnectionEvent event) {
 		//TODO:
-	}
+int connection_id = idRange.allocateNextID();
+		IPacketProcessor packetProcessor = packetProcessorFactory.createNewInstance();
+		TcpConnection connection;
+		try{
+			connection = new TcpConnection(event.socket(), connection_id, packetProcessor);
+		}catch (IOException ioException){
+			//SHIT must be something
+			return;
+		}
 
-	private void closeConnection(TcpConnectionEvent event) {
+		//id2socket.put(connection_id, event.socket());
+		id2connections.put(connection_id, connection);
+		nimble.addFullEventPlugin(connection);
+
+	}*/
+
+	/*private void closeConnection(TcpConnectionEvent event) {
 		//TODO:
-	}
 
-	@Override
-	public boolean compatibleInput(String eventType) {
-		return TcpConnectionEvent.DISCONNECT.equals(eventType) || TcpConnectionEvent.CONNECT.equals(eventType);
-	}
 
-	@Override
-	public boolean hasEventToHandle() {
-		//TODO:
-		return false;
-	}
+		TcpConnection connection = null;
+		Enumeration<TcpConnection> connectionEnumeration = id2connections.elements();
+		while (connectionEnumeration.hasMoreElements()){
+			connection = connectionEnumeration.nextElement();
+			if(connection.socket() == event.socket()){
+				break;
+			}
+		}
 
-	@Override
-	public Event nextEvent() {
-		return null;
-	}
+		if(connection==null){
+			//SHIT error
+		}else{
+			id2connections.remove(connection.connection_id());
+			nimble.removeFullEventPlugin(connection);
+			connection.destroy();
+		}
+
+	}*/
+
 }
