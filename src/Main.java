@@ -1,14 +1,11 @@
 import com.ramshteks.nimble.core.Event;
 import com.ramshteks.nimble.core.EventIO;
 import com.ramshteks.nimble.core.Nimble;
-import com.ramshteks.nimble.server.IPacketProcessor;
-import com.ramshteks.nimble.server.IPacketProcessorFactory;
 import com.ramshteks.nimble.server.ServerUtils;
 import com.ramshteks.nimble.tcp.TcpConnectionsStack;
 import com.ramshteks.nimble.tcp.TcpReceptor;
 
 import java.net.InetAddress;
-import java.util.Iterator;
 
 /**
  * ...
@@ -17,10 +14,17 @@ import java.util.Iterator;
  */
 public class Main {
 	public static void main(String[] args) {
-		System.out.print("Hello world");
+		System.out.println("Hello world");
+
+		ServerUtils.IDGenerator idGenerator = new ServerUtils.IDGenerator(0, 2);
+
+		System.out.println(idGenerator.nextID());
+		System.out.println(idGenerator.nextID());
+		idGenerator.free(0);
+		System.out.println(idGenerator.nextID());
 
 		Nimble nimble = new Nimble();
-		TcpReceptor tcpReceptor = new TcpReceptor(new TcpConnectionsStack(nimble, new ServerUtils.IDRange(0, 100000), null));
+		TcpReceptor tcpReceptor = new TcpReceptor(new TcpConnectionsStack(nimble, new ServerUtils.IDGenerator(0, 100000), null));
 
 		try {
 			tcpReceptor.startBinding(InetAddress.getLocalHost(), 4000);
@@ -29,7 +33,9 @@ public class Main {
 
 		nimble.addFullEventPlugin(tcpReceptor);
 
-		nimble.start();
+		//nimble.start();
+
+
 
 
 	}

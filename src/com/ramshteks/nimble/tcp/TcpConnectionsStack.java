@@ -6,7 +6,7 @@ import com.ramshteks.nimble.server.ServerUtils;
 import java.net.Socket;
 
 public class TcpConnectionsStack {
-	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDRange idRange, Object o) {
+	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDGenerator idGenerator, Object o) {
 
 	}
 
@@ -16,10 +16,10 @@ public class TcpConnectionsStack {
 	}
 	/*private Hashtable<Integer, TcpConnection> id2connections;
 	private Nimble nimble;
-	private ServerUtils.IDRange idRange;
+	private ServerUtils.IDGenerator idRange;
 	private IPacketProcessorFactory packetProcessorFactory;
 
-	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDRange idRange, IPacketProcessorFactory packetProcessorFactory) {
+	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDGenerator idRange, IPacketProcessorFactory packetProcessorFactory) {
 		this.nimble = nimble;
 		this.idRange = idRange;
 		this.packetProcessorFactory = packetProcessorFactory;
@@ -32,7 +32,7 @@ public class TcpConnectionsStack {
 
 	/*private void createConnection(TcpConnectionEvent event) {
 		//TODO:
-int connection_id = idRange.allocateNextID();
+int connection_id = idRange.nextID();
 		IPacketProcessor packetProcessor = packetProcessorFactory.createNewInstance();
 		TcpConnection connection;
 		try{
