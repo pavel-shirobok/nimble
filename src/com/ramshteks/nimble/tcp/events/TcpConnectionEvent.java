@@ -10,8 +10,8 @@ import com.ramshteks.nimble.tcp.TcpConnectionInfo;
  */
 public class TcpConnectionEvent extends Event {
 
-	public static final String CONNECT = "com.ramshteks.nimble.tcp.events.TcpConnectionEvent#CONNECT";
-	public static final String DISCONNECT = "com.ramshteks.nimble.tcp.events.TcpConnectionEvent#DISCONNECT";
+	public static final String CONNECT = "TcpConnectionEvent#CONNECT";
+	public static final String DISCONNECT = "TcpConnectionEvent#DISCONNECT";
 	private TcpConnectionInfo connectionInfo;
 
 

@@ -82,18 +82,27 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 			try {
 				acceptedSocket = socket.accept();
 			} catch (SecurityException secEx) {
+				//SHIT
 				System.out.println("tcp accepter security error");
 				break;
 			} catch (SocketTimeoutException socTEx) {
+				//SHIT
 				System.out.println("tcp accepter timeout error");
 				break;
 			} catch (IOException ioEx) {
+				//SHIT
 				System.out.println("tcp accepter io error");
 				break;
 			}
 
 			if(null != acceptedSocket){
-				TcpConnectionInfo connectionInfo = connectionsStack.createConnection(acceptedSocket);
+				TcpConnectionInfo connectionInfo;
+				try {
+					connectionInfo = connectionsStack.createConnection(acceptedSocket);
+				}catch (IOException exception){
+					//SHIT
+					continue;
+				}
 				pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, connectionInfo));
 			}
 		}

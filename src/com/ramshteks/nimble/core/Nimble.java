@@ -109,13 +109,11 @@ public class Nimble implements Runnable {
 
 			startTimeMillis = System.currentTimeMillis();
 
-			sendToAll(startLoopEvent, receivers);
+			synchronizedSendToAll(startLoopEvent, receivers);
 
 			if(serverInputEventStream.hasEventToHandle()){
 				event = serverInputEventStream.nextEvent();
-				synchronized (receivers){
-					sendToAll(event, receivers);
-				}
+				synchronizedSendToAll(event, receivers);
 			}
 
 			synchronized (senders){
@@ -126,7 +124,7 @@ public class Nimble implements Runnable {
 				}
 			}
 
-			sendToAll(endLoopEvent, receivers);
+			synchronizedSendToAll(endLoopEvent, receivers);
 
 			endTimeMillis = System.currentTimeMillis();
 
@@ -147,10 +145,16 @@ public class Nimble implements Runnable {
 		}
 	}
 
-	private void sendToAll(Event event, LinkedList<EventIO.EventReceiver> eventReceivers){
-		int len = eventReceivers.size();
-		for(int i = 0; i < len; i++){
-			receivers.get(i).pushEvent(event);
+	private void synchronizedSendToAll(Event event, LinkedList<EventIO.EventReceiver> eventReceivers){
+		synchronized (eventReceivers){
+			int len = eventReceivers.size();
+			EventIO.EventReceiver receiver;
+			for(int i = 0; i < len; i++){
+				receiver = eventReceivers.get(i);
+				if(receiver.compatibleInput(event.eventType())){
+					receiver.pushEvent(event);
+				}
+			}
 		}
 	}
 

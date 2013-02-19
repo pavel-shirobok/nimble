@@ -1,7 +1,10 @@
 import com.ramshteks.nimble.core.Event;
 import com.ramshteks.nimble.core.EventIO;
 import com.ramshteks.nimble.core.Nimble;
+import com.ramshteks.nimble.server.IPacketProcessor;
+import com.ramshteks.nimble.server.IPacketProcessorFactory;
 import com.ramshteks.nimble.server.ServerUtils;
+import com.ramshteks.nimble.tcp.TcpConnectionInfo;
 import com.ramshteks.nimble.tcp.TcpConnectionsStack;
 import com.ramshteks.nimble.tcp.TcpReceptor;
 
@@ -14,17 +17,19 @@ import java.net.InetAddress;
  */
 public class Main {
 	public static void main(String[] args) {
-		System.out.println("Hello world");
-
-		ServerUtils.IDGenerator idGenerator = new ServerUtils.IDGenerator(0, 2);
-
-		System.out.println(idGenerator.nextID());
-		System.out.println(idGenerator.nextID());
-		idGenerator.free(0);
-		System.out.println(idGenerator.nextID());
 
 		Nimble nimble = new Nimble();
-		TcpReceptor tcpReceptor = new TcpReceptor(new TcpConnectionsStack(nimble, new ServerUtils.IDGenerator(0, 100000), null));
+
+		IPacketProcessorFactory packetProcessorFactory = new IPacketProcessorFactory() {
+			@Override
+			public IPacketProcessor createNewInstance(TcpConnectionInfo connectionInfo) {
+				return null;
+			}
+		};
+
+		ServerUtils.IDGenerator idGenerator = new ServerUtils.IDGenerator(0, 100000);
+		TcpConnectionsStack connStack = new TcpConnectionsStack(nimble, idGenerator, packetProcessorFactory);
+		TcpReceptor tcpReceptor = new TcpReceptor(connStack);
 
 		try {
 			tcpReceptor.startBinding(InetAddress.getLocalHost(), 4000);

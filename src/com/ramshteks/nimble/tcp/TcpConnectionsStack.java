@@ -1,74 +1,48 @@
 package com.ramshteks.nimble.tcp;
 
-import com.ramshteks.nimble.core.Nimble;
-import com.ramshteks.nimble.server.ServerUtils;
+import com.ramshteks.nimble.core.*;
+import com.ramshteks.nimble.server.*;
 
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 public class TcpConnectionsStack {
-	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDGenerator idGenerator, Object o) {
-
-	}
-
-	public TcpConnectionInfo createConnection(Socket socket) {
-
-		return null;
-	}
-	/*private Hashtable<Integer, TcpConnection> id2connections;
 	private Nimble nimble;
-	private ServerUtils.IDGenerator idRange;
+	private ServerUtils.IDGenerator idGenerator;
 	private IPacketProcessorFactory packetProcessorFactory;
+	private Hashtable<Integer, TcpConnection> connections;
 
-	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDGenerator idRange, IPacketProcessorFactory packetProcessorFactory) {
+	public TcpConnectionsStack(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory) {
 		this.nimble = nimble;
-		this.idRange = idRange;
+		this.idGenerator = idGenerator;
 		this.packetProcessorFactory = packetProcessorFactory;
-		id2connections = new Hashtable<Integer, TcpConnection>();
+
+		connections = new Hashtable<Integer, TcpConnection>();
 	}
 
-	private boolean equalEvent(String actual, String expect){
-		return actual.equals(expect);
-	}*/
+	public TcpConnectionInfo createConnection(Socket socket) throws IOException{
 
-	/*private void createConnection(TcpConnectionEvent event) {
-		//TODO:
-int connection_id = idRange.nextID();
-		IPacketProcessor packetProcessor = packetProcessorFactory.createNewInstance();
+		int connection_id = idGenerator.nextID();
+		TcpConnectionInfo connectionInfo = new TcpConnectionInfo(connection_id);
+		IPacketProcessor packetProcessor = packetProcessorFactory.createNewInstance(connectionInfo);
 		TcpConnection connection;
-		try{
-			connection = new TcpConnection(event.socket(), connection_id, packetProcessor);
-		}catch (IOException ioException){
-			//SHIT must be something
-			return;
-		}
 
-		//id2socket.put(connection_id, event.socket());
-		id2connections.put(connection_id, connection);
+		connection = new TcpConnection(socket, connectionInfo, packetProcessor);
+		connections.put(connection_id, connection);
 		nimble.addFullEventPlugin(connection);
 
-	}*/
+		return connectionInfo;
+	}
 
-	/*private void closeConnection(TcpConnectionEvent event) {
-		//TODO:
+	public void destroyConnection(TcpConnectionInfo connectionInfo){
 
+		TcpConnection connection = connections.get(connectionInfo.connection_id());
+		nimble.removeFullEventPlugin(connection);
+		idGenerator.free(connectionInfo.connection_id());
+		connections.remove(connectionInfo.connection_id());
 
-		TcpConnection connection = null;
-		Enumeration<TcpConnection> connectionEnumeration = id2connections.elements();
-		while (connectionEnumeration.hasMoreElements()){
-			connection = connectionEnumeration.nextElement();
-			if(connection.socket() == event.socket()){
-				break;
-			}
-		}
+		//Shit connection.destroy();
 
-		if(connection==null){
-			//SHIT error
-		}else{
-			id2connections.remove(connection.connection_id());
-			nimble.removeFullEventPlugin(connection);
-			connection.destroy();
-		}
-
-	}*/
-
+	}
 }

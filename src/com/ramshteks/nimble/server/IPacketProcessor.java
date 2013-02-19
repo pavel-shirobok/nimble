@@ -1,6 +1,7 @@
 package com.ramshteks.nimble.server;
 
-import com.ramshteks.nimble.core.Event;
+import com.ramshteks.nimble.core.*;
+import com.ramshteks.nimble.tcp.*;
 
 /**
  * ...
@@ -9,23 +10,10 @@ import com.ramshteks.nimble.core.Event;
  */
 public interface IPacketProcessor {
 
-	/*void addToPacking(RawPacket packet);
-	void addToUnpacking(byte[] rawData);
+	void addToProcessFromSocket(TcpConnectionInfo connectionInfo, byte[] bytes);
+	void addToProcessToSocket(TcpConnectionInfo connectionInfo, byte[] bytes);
 
-	boolean doPacking();
-	boolean doUnpacking();*/
-	/*public static final class RawPacket extends Event {
-		private byte[] bytes;
-
-		public RawPacket(String eventType, byte[] bytes) {
-			super(eventType, PACKET);
-			this.bytes = bytes;
-		}
-
-		byte[] getData(){
-			return  bytes;
-		}
-	}*/
-
+	EventIO.EventSender toSocket();
+	EventIO.EventSender fromSocket();
 }
 
