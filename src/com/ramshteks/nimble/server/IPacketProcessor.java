@@ -1,7 +1,7 @@
 package com.ramshteks.nimble.server;
 
 import com.ramshteks.nimble.core.*;
-import com.ramshteks.nimble.tcp.*;
+import com.ramshteks.nimble.server.tcp.*;
 
 /**
  * ...

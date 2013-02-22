@@ -1,9 +1,9 @@
-package com.ramshteks.nimble.tcp;
+package com.ramshteks.nimble.server.tcp;
 
 import com.ramshteks.nimble.core.*;
 import com.ramshteks.nimble.server.IPacketProcessor;
-import com.ramshteks.nimble.tcp.events.RawTcpPacketEvent;
-import com.ramshteks.nimble.tcp.events.TcpPacketEvent;
+import com.ramshteks.nimble.server.tcp.events.RawTcpPacketEvent;
+import com.ramshteks.nimble.server.tcp.events.TcpPacketEvent;
 
 import java.io.*;
 import java.net.Socket;
@@ -24,7 +24,7 @@ public class TcpConnection implements EventIO.EventFull {
 	private OutputStream outputStream;
 	private InputStream inputStream;
 
-	private EventStack inputEvents;
+	//private EventStack inputEvents;
 	private EventStack outputEvents;
 
 	public TcpConnection(Socket socket, TcpConnectionInfo connectionInfo, IPacketProcessor packetProcessor) throws IOException{
@@ -36,7 +36,7 @@ public class TcpConnection implements EventIO.EventFull {
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
 
-		inputEvents = new EventStack(new String[]{TcpPacketEvent.TCP_PACKET_SEND, TcpPacketEvent.LOOP_START});
+		//inputEvents = new EventStack(new String[]{TcpPacketEvent.TCP_PACKET_SEND, TcpPacketEvent.LOOP_START});
 		outputEvents = new EventStack(new String[]{});
 	}
 
@@ -72,7 +72,7 @@ public class TcpConnection implements EventIO.EventFull {
 				return;
 			}
 		} catch (IOException ioException) {
-			//SHIT
+			System.out.println("available method throw ioException");
 			return;
 		}
 
@@ -83,7 +83,9 @@ public class TcpConnection implements EventIO.EventFull {
 		try {
 			read = stream.read(raw_input);
 		} catch (IOException ioException) {
-			//SHIT
+			if(connectionEvent!=null){
+				connectionEvent.onConnectionClosed(connectionInfo);
+			}
 			return;
 		}
 		read = 0;
@@ -107,7 +109,7 @@ public class TcpConnection implements EventIO.EventFull {
 				case WRITE:
 					RawTcpPacketEvent rawTcpPacketEvent = (RawTcpPacketEvent)event;
 					if(rawTcpPacketEvent == null){
-						//SHIT
+						System.out.println("event with type" + event.eventType() + " has unexpected class type");
 						return;
 					}
 					flushToSocket(rawTcpPacketEvent.bytes());
@@ -123,10 +125,9 @@ public class TcpConnection implements EventIO.EventFull {
 			outputStream.write(bytes);
 			outputStream.flush();
 		} catch (IOException e) {
-			//SHIT
-			/*if (connectionEvent != null) {
-				connectionEvent.onConnectionClosed(cid);
-			}*/
+			if (connectionEvent != null) {
+				connectionEvent.onConnectionClosed(connectionInfo);
+			}
 		}
 	}
 
@@ -150,19 +151,19 @@ public class TcpConnection implements EventIO.EventFull {
 		try {
 			outputStream.close();
 		} catch (IOException exp) {
-			//SHIT logger.log("Connection:close: outputStream ", exp, Core.LoggerLevel.WARNING);
+			System.out.println("Connection:close: outputStream ");
 		}
 
 		try {
 			inputStream.close();
 		} catch (IOException exp) {
-			//SHIT logger.log("Connection:close: inputStream ", exp, Core.LoggerLevel.WARNING);
+			System.out.println("Connection:close: inputStream ");
 		}
 
 		try {
 			socket.close();
 		} catch (IOException exp) {
-			//SHIT logger.log("Connection:close: socket ", exp, Core.LoggerLevel.WARNING);
+			System.out.println("Connection:close: socket ");
 		}
 
 		connectionEvent = null;

@@ -1,4 +1,4 @@
-package com.ramshteks.nimble.tcp;
+package com.ramshteks.nimble.server.tcp;
 
 /**
  * ...

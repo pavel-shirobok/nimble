@@ -1,4 +1,4 @@
-package com.ramshteks.nimble.tcp.events;
+package com.ramshteks.nimble.server.tcp.events;
 
 import com.ramshteks.nimble.core.Event;
 

@@ -1,10 +1,11 @@
-package com.ramshteks.nimble.tcp;
+package com.ramshteks.nimble.server.tcp;
 
 import com.ramshteks.nimble.core.Event;
 import com.ramshteks.nimble.core.EventIO;
 import com.ramshteks.nimble.core.EventStack;
+import com.ramshteks.nimble.core.Nimble;
 import com.ramshteks.nimble.server.*;
-import com.ramshteks.nimble.tcp.events.*;
+import com.ramshteks.nimble.server.tcp.events.*;
 
 import java.io.*;
 import java.net.*;
@@ -22,9 +23,13 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 	private TcpConnectionsStack connectionsStack;
 	private EventStack eventStack;
 
-	public TcpReceptor(TcpConnectionsStack connectionsStack) {
-		this.connectionsStack = connectionsStack;
+	public TcpReceptor(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory) {
+		this.connectionsStack = createStack(nimble, idGenerator, packetProcessorFactory);
 		eventStack = new EventStack(new String[]{Event.LOOP_START});
+	}
+
+	private TcpConnectionsStack createStack(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory) {
+		return new TcpConnectionsStack(nimble, idGenerator, packetProcessorFactory);
 	}
 
 	@Override
@@ -79,6 +84,7 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 	public void run() {
 		Socket acceptedSocket;
 		while (!socket.isClosed()) {
+			//System.out.println("accepting");
 			try {
 				acceptedSocket = socket.accept();
 			} catch (SecurityException secEx) {
@@ -101,9 +107,10 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 					connectionInfo = connectionsStack.createConnection(acceptedSocket);
 				}catch (IOException exception){
 					//SHIT
+					System.out.println("Connection failed");
 					continue;
 				}
-				pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, connectionInfo));
+				eventStack.pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, connectionInfo));
 			}
 		}
 	}

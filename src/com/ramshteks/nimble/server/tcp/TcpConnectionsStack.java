@@ -1,4 +1,4 @@
-package com.ramshteks.nimble.tcp;
+package com.ramshteks.nimble.server.tcp;
 
 import com.ramshteks.nimble.core.*;
 import com.ramshteks.nimble.server.*;
@@ -7,7 +7,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-public class TcpConnectionsStack {
+public class TcpConnectionsStack implements ITcpConnectionEvent{
 	private Nimble nimble;
 	private ServerUtils.IDGenerator idGenerator;
 	private IPacketProcessorFactory packetProcessorFactory;
@@ -36,13 +36,16 @@ public class TcpConnectionsStack {
 	}
 
 	public void destroyConnection(TcpConnectionInfo connectionInfo){
-
 		TcpConnection connection = connections.get(connectionInfo.connection_id());
 		nimble.removeFullEventPlugin(connection);
 		idGenerator.free(connectionInfo.connection_id());
 		connections.remove(connectionInfo.connection_id());
 
-		//Shit connection.destroy();
+		connection.close();
+	}
 
+	@Override
+	public void onConnectionClosed(TcpConnectionInfo connectionInfo) {
+		destroyConnection(connectionInfo);
 	}
 }

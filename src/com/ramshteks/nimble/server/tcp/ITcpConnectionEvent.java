@@ -1,4 +1,4 @@
-package com.ramshteks.nimble.tcp;
+package com.ramshteks.nimble.server.tcp;
 
 /**
  * ...
@@ -6,5 +6,5 @@ package com.ramshteks.nimble.tcp;
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
 public interface ITcpConnectionEvent {
-	void onConnectionClosed(int cid);
+	void onConnectionClosed(TcpConnectionInfo connectionInfo);
 }

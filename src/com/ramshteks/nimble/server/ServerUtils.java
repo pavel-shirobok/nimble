@@ -19,8 +19,12 @@ public class ServerUtils {
 			freeIDList = new LinkedList<Integer>();
 
 			for(int id = min; id < max; id++){
+				//long time = System.currentTimeMillis();
 				updateAllocateStatus(id, false);
+				//System.out.println("update " + (System.currentTimeMillis() - time));
+				//time = System.currentTimeMillis();
 				freeIDList.add(id);
+				//System.out.println("add " + (System.currentTimeMillis() - time));
 			}
 		}
 
@@ -49,9 +53,9 @@ public class ServerUtils {
 		}
 
 		private void updateAllocateStatus(int id, boolean allocated){
-			if(idToStatus.contains(id)){
+			/*if(idToStatus.contains(id)){
 				idToStatus.remove(id);
-			}
+			}*/
 			idToStatus.put(id, allocated);
 		}
 	}

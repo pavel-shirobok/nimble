@@ -1,6 +1,6 @@
 package com.ramshteks.nimble.server;
 
-import com.ramshteks.nimble.tcp.TcpConnectionInfo;
+import com.ramshteks.nimble.server.tcp.TcpConnectionInfo;
 
 /**
  * ...
