@@ -2,6 +2,7 @@ package tcp_echo;
 
 import com.ramshteks.nimble.core.Nimble;
 import com.ramshteks.nimble.server.ServerUtils;
+import com.ramshteks.nimble.server.logger.StandardOutLoggerPlugin;
 import com.ramshteks.nimble.server.tcp.TcpReceptor;
 import com.ramshteks.nimble.server.statistic.ServerStatistics;
 
@@ -44,7 +45,7 @@ public class TcpEchoServer {
 
 		//adding tcp receptor
 		nimble.addFullEventPlugin(tcpReceptor);
-
+		nimble.addReceiverPlugin(new StandardOutLoggerPlugin());
 		//adding statistic plugin
 		nimble.addReceiverPlugin(new ServerStatistics());
 

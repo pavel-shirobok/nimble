@@ -98,6 +98,8 @@ public class Nimble implements Runnable {
 		long endTimeMillis;
 
 		Event event;
+		boolean firstCycle = true;
+
 		Event startLoopEvent = new Event(Event.LOOP_START);
 		Event endLoopEvent = new Event(Event.LOOP_END);
 
@@ -108,6 +110,11 @@ public class Nimble implements Runnable {
 			}
 
 			startTimeMillis = System.currentTimeMillis();
+
+			if(firstCycle){
+				firstCycle = false;
+				synchronizedSendToAll(new Event(Event.START), receivers);
+			}
 
 			synchronizedSendToAll(startLoopEvent, receivers);
 
@@ -149,11 +156,9 @@ public class Nimble implements Runnable {
 		synchronized (eventReceivers){
 			int len = eventReceivers.size();
 			EventIO.EventReceiver receiver;
-			for(int i = 0; i < len; i++){
+			for (int i = 0; i < len; i++){
 				receiver = eventReceivers.get(i);
-				if(receiver.compatibleInput(event.eventType())){
-					receiver.pushEvent(event);
-				}
+				receiver.pushEvent(event);
 			}
 		}
 	}

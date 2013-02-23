@@ -9,32 +9,13 @@ import java.util.LinkedList;
  */
 public class EventStack implements EventIO.EventSender, EventIO.EventReceiver {
 	private LinkedList<Event> events;
-	private String[] acceptable;
-	private boolean compatibleAll = false;
-	public EventStack(){
-		events = new LinkedList<Event>();
-		compatibleAll = true;
-	}
 
-	public EventStack(String[] acceptable){
-		this.acceptable = acceptable;
+	public EventStack(){
 		events = new LinkedList<Event>();
 	}
 
 	public void pushEvent(Event event){
 		events.addLast(event);
-	}
-
-	@Override
-	public boolean compatibleInput(String eventType) {
-		if(compatibleAll)return true;
-
-		int len = acceptable.length;
-		for (int i = 0; i < len; i++){
-			if(acceptable[i].equals(eventType))return true;
-		}
-
-		return false;
 	}
 
 	public boolean hasEventToHandle(){

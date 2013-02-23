@@ -2,6 +2,7 @@ package com.ramshteks.nimble.server.tcp;
 
 import com.ramshteks.nimble.core.*;
 import com.ramshteks.nimble.server.IPacketProcessor;
+import com.ramshteks.nimble.server.logger.LogHelper;
 import com.ramshteks.nimble.server.tcp.events.RawTcpPacketEvent;
 import com.ramshteks.nimble.server.tcp.events.TcpPacketEvent;
 
@@ -23,8 +24,7 @@ public class TcpConnection implements EventIO.EventFull {
 	private IPacketProcessor packetProcessor;
 	private OutputStream outputStream;
 	private InputStream inputStream;
-
-	//private EventStack inputEvents;
+	private LogHelper logger;
 	private EventStack outputEvents;
 
 	public TcpConnection(Socket socket, TcpConnectionInfo connectionInfo, IPacketProcessor packetProcessor) throws IOException{
@@ -36,8 +36,8 @@ public class TcpConnection implements EventIO.EventFull {
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
 
-		//inputEvents = new EventStack(new String[]{TcpPacketEvent.TCP_PACKET_SEND, TcpPacketEvent.LOOP_START});
-		outputEvents = new EventStack(new String[]{});
+		outputEvents = new EventStack();
+		logger = new LogHelper(outputEvents, "TcpConnection$"+connectionInfo().toString());
 	}
 
 	public void setConnectionEvent(ITcpConnectionEvent connectionEvent){
@@ -66,31 +66,38 @@ public class TcpConnection implements EventIO.EventFull {
 	}
 
 	private void readFromStream(InputStream stream, IPacketProcessor processor) {
-		int available;
+		/*int available;
 		try {
 			if ((available = stream.available()) == 0) {
 				return;
 			}
 		} catch (IOException ioException) {
-			System.out.println("available method throw ioException");
+			logger.logException("Available method failed", ioException);
 			return;
 		}
 
 
 		byte[] raw_input = new byte[available];
 
-		int read;
+		int readed;
 		try {
-			read = stream.read(raw_input);
+			//noinspection ResultOfMethodCallIgnored
+			readed = stream.read(raw_input);
 		} catch (IOException ioException) {
 			if(connectionEvent!=null){
 				connectionEvent.onConnectionClosed(connectionInfo);
 			}
 			return;
 		}
-		read = 0;
 
-		processor.addToProcessFromSocket(connectionInfo, raw_input);
+		if(readed == -1){
+			if(connectionEvent!=null){
+				connectionEvent.onConnectionClosed(connectionInfo);
+			}
+			return;
+		}*/
+
+		//processor.addToProcessFromSocket(connectionInfo, raw_input);
 	}
 
 	private void addBytesToSend(byte[] bytes) {
@@ -109,7 +116,7 @@ public class TcpConnection implements EventIO.EventFull {
 				case WRITE:
 					RawTcpPacketEvent rawTcpPacketEvent = (RawTcpPacketEvent)event;
 					if(rawTcpPacketEvent == null){
-						System.out.println("event with type" + event.eventType() + " has unexpected class type");
+						logger.logError("Received event with type '" + event.eventType() + "' has unexpected class type");
 						return;
 					}
 					flushToSocket(rawTcpPacketEvent.bytes());
@@ -120,7 +127,6 @@ public class TcpConnection implements EventIO.EventFull {
 	}
 
 	private void flushToSocket(byte[] bytes) {
-		//TODO:
 		try {
 			outputStream.write(bytes);
 			outputStream.flush();
@@ -141,29 +147,25 @@ public class TcpConnection implements EventIO.EventFull {
 		return outputEvents.nextEvent();
 	}
 
-	@Override
-	public boolean compatibleInput(String eventType) {
-		return eventType.equals(TcpPacketEvent.TCP_PACKET_SEND) || eventType.equals(TcpPacketEvent.LOOP_START);
-	}
-
 	public void close() {
 
 		try {
 			outputStream.close();
 		} catch (IOException exp) {
+			logger.logWarning("Closing output stream failed");
 			System.out.println("Connection:close: outputStream ");
 		}
 
 		try {
 			inputStream.close();
 		} catch (IOException exp) {
-			System.out.println("Connection:close: inputStream ");
+			logger.logWarning("Closing input stream failed");
 		}
 
 		try {
 			socket.close();
 		} catch (IOException exp) {
-			System.out.println("Connection:close: socket ");
+			logger.logWarning("Closing socket failed");
 		}
 
 		connectionEvent = null;
@@ -171,4 +173,17 @@ public class TcpConnection implements EventIO.EventFull {
 		inputStream = null;
 		socket = null;
 	}
+
+	public TcpConnectionInfo connectionInfo() {
+		return connectionInfo;
+	}
+
+	public Boolean isClosed(){
+		return socket.isClosed();
+	}
+
+	public Boolean isConnected(){
+		return socket.isConnected();
+	}
+
 }

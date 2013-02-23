@@ -5,6 +5,9 @@ import com.ramshteks.nimble.core.EventIO;
 import com.ramshteks.nimble.core.EventStack;
 import com.ramshteks.nimble.core.Nimble;
 import com.ramshteks.nimble.server.*;
+import com.ramshteks.nimble.server.logger.LogHelper;
+import com.ramshteks.nimble.server.logger.LogLevel;
+import com.ramshteks.nimble.server.logger.LoggerEvent;
 import com.ramshteks.nimble.server.tcp.events.*;
 
 import java.io.*;
@@ -22,10 +25,13 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 	private Thread thread;
 	private TcpConnectionsStack connectionsStack;
 	private EventStack eventStack;
-
+	private LogHelper logger;
 	public TcpReceptor(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory) {
+
 		this.connectionsStack = createStack(nimble, idGenerator, packetProcessorFactory);
-		eventStack = new EventStack(new String[]{Event.LOOP_START});
+		eventStack = new EventStack();
+
+		logger = new LogHelper(eventStack, "TcpReceptor");
 	}
 
 	private TcpConnectionsStack createStack(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory) {
@@ -61,13 +67,9 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 
 	@Override
 	public void pushEvent(Event event) {
-
-		//check socket to disconnect &
-	}
-
-	@Override
-	public boolean compatibleInput(String eventType) {
-		return eventStack.compatibleInput(eventType);
+		if(Event.START.equals(event.eventType())){
+			eventStack.pushEvent(new LoggerEvent(LogLevel.Message, "Server started", "TcpReceptor"));
+		}
 	}
 
 	@Override
@@ -84,34 +86,26 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 	public void run() {
 		Socket acceptedSocket;
 		while (!socket.isClosed()) {
-			//System.out.println("accepting");
 			try {
 				acceptedSocket = socket.accept();
-			} catch (SecurityException secEx) {
-				//SHIT
-				System.out.println("tcp accepter security error");
-				break;
-			} catch (SocketTimeoutException socTEx) {
-				//SHIT
-				System.out.println("tcp accepter timeout error");
-				break;
-			} catch (IOException ioEx) {
-				//SHIT
-				System.out.println("tcp accepter io error");
+			} catch (Exception secEx) {
+				logger.logException("Accepting failed", secEx);
 				break;
 			}
 
 			if(null != acceptedSocket){
 				TcpConnectionInfo connectionInfo;
+
 				try {
 					connectionInfo = connectionsStack.createConnection(acceptedSocket);
 				}catch (IOException exception){
-					//SHIT
-					System.out.println("Connection failed");
+					logger.logException("Creating connection failed", exception);
 					continue;
 				}
+
 				eventStack.pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, connectionInfo));
 			}
 		}
 	}
+
 }

@@ -23,11 +23,6 @@ public class ServerStatistics implements EventIO.EventReceiver {
 	private long lastLoopTime = System.currentTimeMillis();
 
 	@Override
-	public boolean compatibleInput(String eventType) {
-		return true;
-	}
-
-	@Override
 	public void pushEvent(Event event) {
 		switch (event.eventType()){
 			case Event.LOOP_START:

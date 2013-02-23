@@ -16,4 +16,9 @@ public class TcpConnectionInfo {
 	public int connection_id() {
 		return connection_id;
 	}
+
+	@Override
+	public String toString() {
+		return "" + connection_id;
+	}
 }
