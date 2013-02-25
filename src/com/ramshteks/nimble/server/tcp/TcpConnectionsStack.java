@@ -15,11 +15,13 @@ public class TcpConnectionsStack implements ITcpConnectionEvent{
 	private IPacketProcessorFactory packetProcessorFactory;
 	private ServerUtils.IDGenerator idGenerator;
 	private Nimble nimble;
+	private int timeout;
 
-	public TcpConnectionsStack(Nimble nimble, IDGenerator generator, IPacketProcessorFactory factory) {
+	public TcpConnectionsStack(Nimble nimble, IDGenerator generator, IPacketProcessorFactory factory, int timeout) {
 		this.nimble = nimble;
 		this.idGenerator = generator;
 		this.packetProcessorFactory = factory;
+		this.timeout = timeout;
 
 		//noinspection Convert2Diamond
 		connections = new Hashtable<Integer, TcpConnection>();
@@ -57,11 +59,11 @@ public class TcpConnectionsStack implements ITcpConnectionEvent{
 
 		connectionInfo = createConnectionInfo();
 		packetProcessor = createPacketProcessor(connectionInfo);
-		connection = new TcpConnection(s, connectionInfo, packetProcessor);
-
+		connection = new TcpConnection(s, connectionInfo, packetProcessor, timeout);
+		connection.setConnectionEvent(this);
 		add(connection);
 
-		connection.setConnectionEvent(this);
+
 		return connection;
 	}
 
@@ -81,11 +83,11 @@ public class TcpConnectionsStack implements ITcpConnectionEvent{
 	}
 
 	private void addToCommonQueue(TcpConnection connection){
-		nimble.addFullEventPlugin(connection);
+		nimble.addPlugin(connection);
 	}
 
 	private void removeFromCommonQueue(TcpConnection connection){
-		nimble.removeFullEventPlugin(connection);
+		nimble.removePlugin(connection);
 	}
 
 	private void add(TcpConnection connection) {

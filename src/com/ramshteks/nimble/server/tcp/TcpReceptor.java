@@ -1,9 +1,6 @@
 package com.ramshteks.nimble.server.tcp;
 
-import com.ramshteks.nimble.core.Event;
-import com.ramshteks.nimble.core.EventIO;
-import com.ramshteks.nimble.core.EventStack;
-import com.ramshteks.nimble.core.Nimble;
+import com.ramshteks.nimble.core.*;
 import com.ramshteks.nimble.server.*;
 import com.ramshteks.nimble.server.logger.LogHelper;
 import com.ramshteks.nimble.server.logger.LogLevel;
@@ -26,7 +23,10 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 	private TcpConnectionsStack connectionsStack;
 	private EventStack eventStack;
 	private LogHelper logger;
-	public TcpReceptor(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory) {
+	private int timeout;
+
+	public TcpReceptor(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory, int timeout) {
+		this.timeout = timeout;
 
 		this.connectionsStack = createStack(nimble, idGenerator, packetProcessorFactory);
 		eventStack = new EventStack();
@@ -35,7 +35,7 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 	}
 
 	private TcpConnectionsStack createStack(Nimble nimble, ServerUtils.IDGenerator idGenerator, IPacketProcessorFactory packetProcessorFactory) {
-		return new TcpConnectionsStack(nimble, idGenerator, packetProcessorFactory);
+		return new TcpConnectionsStack(nimble, idGenerator, packetProcessorFactory, timeout);
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 
 	@Override
 	public void pushEvent(Event event) {
-		if(Event.START.equals(event.eventType())){
+		if(NimbleEvent.CYCLE_STARTED.equals(event.eventType())){
 			eventStack.pushEvent(new LoggerEvent(LogLevel.Message, "Server started", "TcpReceptor"));
 		}
 	}

@@ -1,89 +1,50 @@
 package com.ramshteks.nimble.core;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
-/**
- * ...
- *
- * @author Pavel Shirobok (ramshteks@gmail.com)
- */
+import static com.ramshteks.nimble.core.EventIO.*;
+
+
 public class Nimble implements Runnable {
 
-	private final LinkedList<EventIO.EventReceiver> receivers;
-	private final LinkedList<EventIO.EventSender> senders;
+	private final EventIOQueue<EventBase> queueToAdd;
+	private final EventIOQueue<EventBase> queueToRemove;
+
+	//private final Object lock = new Object();
 
 	private Thread mainThread;
 	private final EventStack serverInputEventStream;
 	private boolean mainThreadStarted = false;
+
+	@SuppressWarnings("Convert2Diamond")
 	public Nimble(){
-		receivers = new LinkedList<EventIO.EventReceiver>();
-		senders = new LinkedList<EventIO.EventSender>();
+
+		queueToAdd = new EventIOQueue<EventBase>();
+		queueToRemove = new EventIOQueue<EventBase>();
+
 		serverInputEventStream = new EventStack();
 	}
 
-	public void addReceiverPlugin(EventIO.EventReceiver receiver){
-		synchronized (receivers){
-			receivers.addLast(receiver);
+	public void addPlugin(EventBase eventBase){
+		synchronized (queueToAdd){
+			queueToAdd.addLast(eventBase);
 		}
 	}
 
-	public void addSenderPlugin(EventIO.EventSender sender){
-		synchronized (senders){
-			senders.addLast(sender);
+	public void removePlugin(EventBase eventBase){
+		synchronized (queueToRemove){
+			queueToRemove.addLast(eventBase);
 		}
-	}
-
-	public void addFullEventPlugin(EventIO.EventFull eventFull){
-		addSenderPlugin(eventFull);
-		addReceiverPlugin(eventFull);
-	}
-
-	public void removeReceiverPlugin(EventIO.EventReceiver receiver){
-		synchronized (receivers){
-			receivers.remove(receiver);
-		}
-	}
-
-	public void removeSenderPlugin(EventIO.EventSender sender){
-		synchronized (senders){
-			senders.remove(sender);
-		}
-	}
-
-	public void removeFullEventPlugin(EventIO.EventFull eventFull){
-		removeSenderPlugin(eventFull);
-		removeReceiverPlugin(eventFull);
-	}
-
-	public boolean existReceiverPlugin(EventIO.EventReceiver receiver){
-		boolean result;
-		synchronized (receivers){
-			result = receivers.contains(receiver);
-		}
-		return result;
-	}
-
-	public boolean existSenderPlugin(EventIO.EventSender sender){
-		boolean result;
-		synchronized (senders){
-			result = senders.contains(sender);
-		}
-		return result;
-	}
-
-	public boolean existFullEventPlugin(EventIO.EventFull eventFull){
-		return existReceiverPlugin(eventFull) && existSenderPlugin(eventFull);
 	}
 
 	public void start(){
-
 		mainThread = new Thread(this);
 		mainThread.setPriority(Thread.MAX_PRIORITY);
 		mainThread.start();
 	}
 
+	@SuppressWarnings("UnusedDeclaration")
 	public void stop(){
-		//TODO: make stop thread
 		mainThreadStarted = false;
 		mainThread = null;
 	}
@@ -96,42 +57,57 @@ public class Nimble implements Runnable {
 
 		long startTimeMillis;
 		long endTimeMillis;
-
-		Event event;
 		boolean firstCycle = true;
 
-		Event startLoopEvent = new Event(Event.LOOP_START);
-		Event endLoopEvent = new Event(Event.LOOP_END);
+		Event event;
+
+		NimbleEvent startLoopEvent = new NimbleEvent(NimbleEvent.LOOP_START);
+		NimbleEvent endLoopEvent = new NimbleEvent(NimbleEvent.LOOP_END);
+		NimbleEvent enter_in_queue = new NimbleEvent(NimbleEvent.ENTER_IN_QUEUE);
+		NimbleEvent exit_from_queue = new NimbleEvent(NimbleEvent.EXIT_FROM_QUEUE);
+
+		//noinspection Convert2Diamond
+		ArrayList<EventReceiver> receivers = new ArrayList<EventReceiver>();
+		//noinspection Convert2Diamond
+		ArrayList<EventSender> senders = new ArrayList<EventSender>();
 
 		while (true){
 
+			if(firstCycle){
+				firstCycle = false;
+				pushEventTo(receivers, new NimbleEvent(NimbleEvent.CYCLE_STARTED));
+			}
+
 			if(!mainThreadStarted){
+				pushEventTo(receivers, new NimbleEvent(NimbleEvent.CYCLE_STOPPED));
 				break;
 			}
 
+			processEnterToQueue(enter_in_queue, receivers, senders);
+
 			startTimeMillis = System.currentTimeMillis();
 
-			if(firstCycle){
-				firstCycle = false;
-				synchronizedSendToAll(new Event(Event.START), receivers);
-			}
+			pushEventTo(receivers, startLoopEvent);
 
-			synchronizedSendToAll(startLoopEvent, receivers);
 
 			if(serverInputEventStream.hasEventToHandle()){
 				event = serverInputEventStream.nextEvent();
-				synchronizedSendToAll(event, receivers);
+				pushEventTo(receivers, event);
 			}
 
-			synchronized (senders){
-				for(EventIO.EventSender sender: senders){
-					if(sender.hasEventToHandle()){
-						serverInputEventStream.pushEvent(sender.nextEvent());
-					}
+			int len = senders.size();
+			for(int i = 0; i < len; i++)
+			{
+				EventIO.EventSender sender = senders.get(i);
+				if(sender.hasEventToHandle()){
+					serverInputEventStream.pushEvent(sender.nextEvent());
 				}
 			}
 
-			synchronizedSendToAll(endLoopEvent, receivers);
+
+			pushEventTo(receivers, endLoopEvent);
+
+			processExitFromQueue(exit_from_queue, receivers, senders);
 
 			endTimeMillis = System.currentTimeMillis();
 
@@ -145,6 +121,7 @@ public class Nimble implements Runnable {
 			}
 
 			if(sleepTime!=0){
+				//noinspection EmptyCatchBlock
 				try{
 					Thread.sleep(sleepTime);
 				}catch (Exception exception){}
@@ -152,14 +129,59 @@ public class Nimble implements Runnable {
 		}
 	}
 
-	private void synchronizedSendToAll(Event event, LinkedList<EventIO.EventReceiver> eventReceivers){
-		synchronized (eventReceivers){
-			int len = eventReceivers.size();
-			EventIO.EventReceiver receiver;
-			for (int i = 0; i < len; i++){
-				receiver = eventReceivers.get(i);
-				receiver.pushEvent(event);
+	private void processExitFromQueue(NimbleEvent exitEvent, ArrayList<EventReceiver> receivers, ArrayList<EventSender> senders) {
+		synchronized (queueToRemove){
+			if (queueToRemove.size() != 0) {
+				EventBase eventBase;
+				EventReceiver receiver;
+
+				eventBase = queueToRemove.removeFirst();
+
+				if(receivers.contains(eventBase)){
+					receiver = (EventReceiver)eventBase;
+					receivers.remove(receiver);
+					receiver.pushEvent(exitEvent);
+				}
+
+				if(senders.contains(eventBase)){
+					senders.remove(eventBase);
+				}
 			}
+		}
+	}
+
+	private void processEnterToQueue(NimbleEvent enterEvent, ArrayList<EventReceiver> receivers, ArrayList<EventSender> senders) {
+		synchronized (queueToAdd){
+			if (queueToAdd.size() != 0) {
+				int len = queueToAdd.size();
+				EventBase eventBase;
+
+				EventSender sender;
+				EventReceiver receiver;
+
+				//for (int index = 0; index < len; index++) {
+				eventBase = queueToAdd.removeFirst();
+
+				if(eventBase instanceof EventSender){
+					senders.add(senders.size(), (EventSender)eventBase);
+				}
+
+				if(eventBase instanceof EventReceiver){
+					receiver = (EventReceiver)eventBase;
+					receivers.add(receivers.size(), receiver);
+					receiver.pushEvent(enterEvent);
+				}
+				//}
+			}
+		}
+	}
+
+	private void pushEventTo(ArrayList<EventReceiver> receivers, Event event){
+		int len = receivers.size();
+		EventIO.EventReceiver receiver;
+		for (int i = 0; i < len; i++){
+			receiver = receivers.get(i);
+			receiver.pushEvent(event);
 		}
 	}
 

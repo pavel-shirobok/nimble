@@ -46,7 +46,7 @@ public class Main {
 
 		ServerUtils.IDGenerator idGenerator = new ServerUtils.IDGenerator(0, 100000);
 
-		TcpReceptor tcpReceptor = new TcpReceptor(nimble, idGenerator, packetProcessorFactory);
+		TcpReceptor tcpReceptor = new TcpReceptor(nimble, idGenerator, packetProcessorFactory, 1000);
 
 		try {
 			tcpReceptor.startBinding(InetAddress.getByName("localhost"), 2305);
@@ -54,14 +54,10 @@ public class Main {
 			System.out.println(e.getMessage());
 		}
 
-		nimble.addFullEventPlugin(tcpReceptor);
-		nimble.addReceiverPlugin(new StandardOutLoggerPlugin());
+		nimble.addPlugin(tcpReceptor);
+		nimble.addPlugin(new StandardOutLoggerPlugin());
 
 		nimble.start();
-
-
-
-
 	}
 
 }

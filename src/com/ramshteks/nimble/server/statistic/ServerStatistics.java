@@ -2,6 +2,7 @@ package com.ramshteks.nimble.server.statistic;
 
 import com.ramshteks.nimble.core.Event;
 import com.ramshteks.nimble.core.EventIO;
+import com.ramshteks.nimble.core.NimbleEvent;
 import com.ramshteks.nimble.server.tcp.events.TcpConnectionEvent;
 import com.ramshteks.nimble.server.tcp.events.TcpPacketEvent;
 
@@ -25,7 +26,7 @@ public class ServerStatistics implements EventIO.EventReceiver {
 	@Override
 	public void pushEvent(Event event) {
 		switch (event.eventType()){
-			case Event.LOOP_START:
+			case NimbleEvent.LOOP_START:
 				long newTime = System.currentTimeMillis();
 				if(newTime - lastLoopTime > 1000){
 					printStatistics();
@@ -34,7 +35,7 @@ public class ServerStatistics implements EventIO.EventReceiver {
 				}
 				break;
 
-			case Event.LOOP_END:
+			case NimbleEvent.LOOP_END:
 
 				break;
 
@@ -55,6 +56,7 @@ public class ServerStatistics implements EventIO.EventReceiver {
 
 			case TcpConnectionEvent.DISCONNECT:
 				disconnectedCount++;
+				totalConnectionsCount--;
 				break;
 		}
 	}

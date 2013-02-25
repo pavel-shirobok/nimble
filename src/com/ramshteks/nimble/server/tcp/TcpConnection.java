@@ -4,6 +4,7 @@ import com.ramshteks.nimble.core.*;
 import com.ramshteks.nimble.server.IPacketProcessor;
 import com.ramshteks.nimble.server.logger.LogHelper;
 import com.ramshteks.nimble.server.tcp.events.RawTcpPacketEvent;
+import com.ramshteks.nimble.server.tcp.events.TcpConnectionEvent;
 import com.ramshteks.nimble.server.tcp.events.TcpPacketEvent;
 
 import java.io.*;
@@ -26,18 +27,22 @@ public class TcpConnection implements EventIO.EventFull {
 	private InputStream inputStream;
 	private LogHelper logger;
 	private EventStack outputEvents;
+	private long timeout;
+	private long lastTime;
 
-	public TcpConnection(Socket socket, TcpConnectionInfo connectionInfo, IPacketProcessor packetProcessor) throws IOException{
+	public TcpConnection(Socket socket, TcpConnectionInfo connectionInfo, IPacketProcessor packetProcessor, int timeout) throws IOException{
 
 		this.socket = socket;
 		this.connectionInfo = connectionInfo;
 		this.packetProcessor = packetProcessor;
+		this.timeout = timeout;
 
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
 
 		outputEvents = new EventStack();
 		logger = new LogHelper(outputEvents, "TcpConnection$"+connectionInfo().toString());
+		resetTimeout();
 	}
 
 	public void setConnectionEvent(ITcpConnectionEvent connectionEvent){
@@ -47,7 +52,19 @@ public class TcpConnection implements EventIO.EventFull {
 	@Override
 	public void pushEvent(Event event) {
 		switch (event.eventType()){
-			case Event.LOOP_START:
+			case NimbleEvent.ENTER_IN_QUEUE:
+				resetTimeout();
+				break;
+
+			case NimbleEvent.LOOP_START:
+
+				if(isTimeout()){
+					if(connectionEvent != null){
+						connectionEvent.onConnectionClosed(connectionInfo);
+					}
+					outputEvents.pushEvent(new TcpConnectionEvent(TcpConnectionEvent.DISCONNECT, connectionInfo()));
+					return;
+				}
 
 				readFromStream(inputStream, packetProcessor);
 				//read events for receiving packet
@@ -65,8 +82,17 @@ public class TcpConnection implements EventIO.EventFull {
 		}
 	}
 
+	private boolean isTimeout(){
+		long timeElapsed = System.currentTimeMillis() - lastTime;
+		return  timeElapsed >= timeout;
+	}
+
+	private void resetTimeout(){
+		lastTime = System.currentTimeMillis();
+	}
+
 	private void readFromStream(InputStream stream, IPacketProcessor processor) {
-		/*int available;
+		int available;
 		try {
 			if ((available = stream.available()) == 0) {
 				return;
@@ -79,10 +105,9 @@ public class TcpConnection implements EventIO.EventFull {
 
 		byte[] raw_input = new byte[available];
 
-		int readed;
+		int bytesCountReadFromStream;
 		try {
-			//noinspection ResultOfMethodCallIgnored
-			readed = stream.read(raw_input);
+			bytesCountReadFromStream = stream.read(raw_input);
 		} catch (IOException ioException) {
 			if(connectionEvent!=null){
 				connectionEvent.onConnectionClosed(connectionInfo);
@@ -90,14 +115,15 @@ public class TcpConnection implements EventIO.EventFull {
 			return;
 		}
 
-		if(readed == -1){
+		if(bytesCountReadFromStream == -1){
 			if(connectionEvent!=null){
 				connectionEvent.onConnectionClosed(connectionInfo);
 			}
 			return;
-		}*/
+		}
 
-		//processor.addToProcessFromSocket(connectionInfo, raw_input);
+		resetTimeout();
+		processor.addToProcessFromSocket(connectionInfo, raw_input);
 	}
 
 	private void addBytesToSend(byte[] bytes) {
@@ -134,7 +160,9 @@ public class TcpConnection implements EventIO.EventFull {
 			if (connectionEvent != null) {
 				connectionEvent.onConnectionClosed(connectionInfo);
 			}
+			return;
 		}
+		resetTimeout();
 	}
 
 	@Override
@@ -176,14 +204,6 @@ public class TcpConnection implements EventIO.EventFull {
 
 	public TcpConnectionInfo connectionInfo() {
 		return connectionInfo;
-	}
-
-	public Boolean isClosed(){
-		return socket.isClosed();
-	}
-
-	public Boolean isConnected(){
-		return socket.isConnected();
 	}
 
 }

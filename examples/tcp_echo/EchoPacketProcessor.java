@@ -30,11 +30,12 @@ public class EchoPacketProcessor implements IPacketProcessor{
 
 	@Override
 	public void addToProcessFromSocket(TcpConnectionInfo connectionInfo, byte[] bytes) {
-		try {
-			fromSocketStream.write(bytes);
+		/*try {
+			//fromSocketStream.write(bytes);
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
+		fromSocket.pushEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_RECV, connectionInfo, bytes));
 	}
 
 

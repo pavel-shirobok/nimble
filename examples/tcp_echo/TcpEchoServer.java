@@ -34,7 +34,7 @@ public class TcpEchoServer {
 			return;
 		}
 
-		TcpReceptor tcpReceptor = new TcpReceptor(nimble, idGenerator, EchoPacketProcessor.factory);
+		TcpReceptor tcpReceptor = new TcpReceptor(nimble, idGenerator, EchoPacketProcessor.factory, 10000);
 
 		try {
 			tcpReceptor.startBinding(inetAddress, 2305);
@@ -44,10 +44,10 @@ public class TcpEchoServer {
 		}
 
 		//adding tcp receptor
-		nimble.addFullEventPlugin(tcpReceptor);
-		nimble.addReceiverPlugin(new StandardOutLoggerPlugin());
+		nimble.addPlugin(tcpReceptor);
+		nimble.addPlugin(new StandardOutLoggerPlugin());
 		//adding statistic plugin
-		nimble.addReceiverPlugin(new ServerStatistics());
+		nimble.addPlugin(new ServerStatistics());
 
 		nimble.start();
 
