@@ -12,8 +12,8 @@ public class TcpConnectionEvent extends Event {
 
 	public static final String CONNECT = "TcpConnectionEvent#CONNECT";
 	public static final String DISCONNECT = "TcpConnectionEvent#DISCONNECT";
-	private TcpConnectionInfo connectionInfo;
 
+	private TcpConnectionInfo connectionInfo;
 
 	public TcpConnectionEvent(String eventType, TcpConnectionInfo connectionInfo) {
 		super(eventType);
@@ -22,5 +22,9 @@ public class TcpConnectionEvent extends Event {
 
 	public TcpConnectionInfo connectionInfo() {
 		return connectionInfo;
+	}
+
+	public static TcpConnectionEvent createDisconnect(TcpConnectionInfo connectionInfo){
+		return new TcpConnectionEvent(DISCONNECT, connectionInfo);
 	}
 }

@@ -5,10 +5,10 @@ import com.ramshteks.nimble.core.EventStack;
 import com.ramshteks.nimble.server.IPacketProcessor;
 import com.ramshteks.nimble.server.IPacketProcessorFactory;
 import com.ramshteks.nimble.server.tcp.TcpConnectionInfo;
+import com.ramshteks.nimble.server.tcp.events.RawTcpPacketEvent;
 import com.ramshteks.nimble.server.tcp.events.TcpPacketEvent;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * ...
@@ -23,25 +23,20 @@ public class EchoPacketProcessor implements IPacketProcessor{
 		}
 	};
 
-	private ByteArrayOutputStream fromSocketStream;
-
 	private EventStack toSocket = new EventStack();
 	private EventStack fromSocket = new EventStack();
 
 	@Override
 	public void addToProcessFromSocket(TcpConnectionInfo connectionInfo, byte[] bytes) {
-		/*try {
-			//fromSocketStream.write(bytes);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
 		fromSocket.pushEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_RECV, connectionInfo, bytes));
 	}
 
 
 	@Override
 	public void addToProcessToSocket(TcpConnectionInfo connectionInfo, byte[] bytes) {
-		toSocket.pushEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_SEND, connectionInfo, bytes));
+		RawTcpPacketEvent rawTcpPacketEvent;
+		rawTcpPacketEvent = new RawTcpPacketEvent(RawTcpPacketEvent.RAW_TCP_PACKET_TO_SEND, bytes);
+		toSocket.pushEvent(rawTcpPacketEvent);
 	}
 
 	@Override

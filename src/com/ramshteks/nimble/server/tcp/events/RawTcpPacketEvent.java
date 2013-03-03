@@ -8,13 +8,15 @@ import com.ramshteks.nimble.core.Event;
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
 public class RawTcpPacketEvent extends Event {
-	public static final String RAW_PACKET_RECV = "RawTcpPacketEvent#RAW_PACKET_RECV";
+	public static final String RAW_TCP_PACKET_TO_SEND = "RawTcpPacketEvent#RAW_TCP_PACKET_TO_SEND";
+	private byte[] bytes;
 
-	public RawTcpPacketEvent(String eventType) {
+	public RawTcpPacketEvent(String eventType, byte[] bytes) {
 		super(eventType);
+		this.bytes = bytes;
 	}
 
 	public byte[] bytes() {
-		return new byte[0];
+		return bytes;
 	}
 }

@@ -9,13 +9,12 @@ import java.util.LinkedList;
  */
 public class EventStack implements EventIO.EventSender, EventIO.EventReceiver {
 	private LinkedList<Event> events;
-
 	public EventStack(){
 		events = new LinkedList<Event>();
 	}
 
 	public void pushEvent(Event event){
-		events.addLast(event);
+		events.addFirst(event);
 	}
 
 	public boolean hasEventToHandle(){
@@ -24,7 +23,7 @@ public class EventStack implements EventIO.EventSender, EventIO.EventReceiver {
 
 	@Override
 	public Event nextEvent() {
-		return events.pollFirst();
+		return events.pollLast();
 	}
 
 }

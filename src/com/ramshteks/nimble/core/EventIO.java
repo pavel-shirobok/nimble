@@ -6,7 +6,6 @@ public interface EventIO{
 
 	public static interface EventReceiver extends EventBase{
 		void pushEvent(Event event);
-		//boolean compatibleInput(String eventType);
 	}
 
 	public static interface EventSender extends EventBase{

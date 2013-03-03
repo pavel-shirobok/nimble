@@ -21,11 +21,46 @@ public class ServerStatistics implements EventIO.EventReceiver {
 	private int totalSendedPackets = 0;
 	private int totalReceivedPackets = 0;
 	private int totalConnectionsCount = 0;
+
+	private int loopCount = 0;
+	private long accumLoopTime = 0;
+	private long loopStartTime;
+
 	private long lastLoopTime = System.currentTimeMillis();
 
 	@Override
 	public void pushEvent(Event event) {
-		switch (event.eventType()){
+		if(Event.equalHash(event, NimbleEvent.LOOP_START)){
+			long newTime = System.currentTimeMillis();
+			loopStartTime = newTime;
+			loopCount++;
+			if(newTime - lastLoopTime > 2000){
+				printStatistics();
+				clear();
+				lastLoopTime = newTime;
+			}
+		}
+		if(Event.equalHash(event, NimbleEvent.LOOP_END)){
+			accumLoopTime+=System.currentTimeMillis() - loopStartTime;
+		}
+		if(Event.equalHash(event, TcpPacketEvent.TCP_PACKET_SEND)){
+			sendedPackets++;
+			totalSendedPackets++;
+		}
+		if(Event.equalHash(event, TcpPacketEvent.TCP_PACKET_RECV)){
+			receivedPackets++;
+			totalReceivedPackets++;
+		}
+		if(Event.equalHash(event, TcpConnectionEvent.CONNECT)){
+			newConnectionCount++;
+			totalConnectionsCount++;
+		}
+		if(Event.equalHash(event, TcpConnectionEvent.DISCONNECT)){
+			disconnectedCount++;
+			totalConnectionsCount--;
+		}
+
+		/*switch (event.eventType()){
 			case NimbleEvent.LOOP_START:
 				long newTime = System.currentTimeMillis();
 				if(newTime - lastLoopTime > 1000){
@@ -58,7 +93,7 @@ public class ServerStatistics implements EventIO.EventReceiver {
 				disconnectedCount++;
 				totalConnectionsCount--;
 				break;
-		}
+		}*/
 	}
 
 	private void clear() {
@@ -66,6 +101,8 @@ public class ServerStatistics implements EventIO.EventReceiver {
 		sendedPackets = 0;
 		newConnectionCount = 0;
 		disconnectedCount = 0;
+		accumLoopTime = 0;
+		loopCount = 0;
 	}
 
 	private void printStatistics() {
@@ -75,6 +112,9 @@ public class ServerStatistics implements EventIO.EventReceiver {
 		System.out.println("*          received = " + receivedPackets);
 		System.out.println("*            sended = " + sendedPackets);
 		System.out.println("* total connections = " + totalConnectionsCount);
+		System.out.println(" ---------------------");
+		System.out.println("*        loop count = " + loopCount);
+		System.out.println("*     avr.loop time = " + (accumLoopTime/loopCount));
 		System.out.println();
 
 	}

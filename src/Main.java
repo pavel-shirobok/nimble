@@ -1,5 +1,6 @@
-import com.ramshteks.nimble.core.EventIO;
-import com.ramshteks.nimble.core.Nimble;
+import com.ramshteks.jqueue.FIFOArrayQueue;
+import com.ramshteks.jqueue.Queue;
+import com.ramshteks.nimble.core.*;
 import com.ramshteks.nimble.server.IPacketProcessor;
 import com.ramshteks.nimble.server.IPacketProcessorFactory;
 import com.ramshteks.nimble.server.ServerUtils;
@@ -17,6 +18,27 @@ import java.net.InetAddress;
 public class Main {
 	public static void main(String[] args) {
 
+		EventStack stack = new EventStack();
+
+		int N = (int)1e6;
+
+
+
+		long time = System.currentTimeMillis();
+		Event event = new Event(NimbleEvent.ENTER_IN_QUEUE);
+		for(int i =0; i<N; i++){
+
+			stack.pushEvent(event);
+		}
+		System.out.println("Create " + N + " time:" + (System.currentTimeMillis() - time));
+
+		time = System.currentTimeMillis();
+		while(stack.hasEventToHandle()){
+			stack.nextEvent();
+		}
+		System.out.println("Get " + N + " time:" + (System.currentTimeMillis() - time));
+
+/*
 		Nimble nimble = new Nimble();
 
 		IPacketProcessorFactory packetProcessorFactory = new IPacketProcessorFactory() {
@@ -57,7 +79,7 @@ public class Main {
 		nimble.addPlugin(tcpReceptor);
 		nimble.addPlugin(new StandardOutLoggerPlugin());
 
-		nimble.start();
+		nimble.start();*/
 	}
 
 }

@@ -17,7 +17,7 @@ import java.net.Socket;
  */
 public class TcpConnection implements EventIO.EventFull {
 
-	private ITcpConnectionEvent connectionEvent;
+	private ITcpConnectionCallback connectionEvent;
 
 	private enum IOAction {READ, WRITE}
 	private Socket socket;
@@ -45,40 +45,51 @@ public class TcpConnection implements EventIO.EventFull {
 		resetTimeout();
 	}
 
-	public void setConnectionEvent(ITcpConnectionEvent connectionEvent){
+	public void setConnectionEvent(ITcpConnectionCallback connectionEvent){
 		this.connectionEvent = connectionEvent;
 	}
 
 	@Override
 	public void pushEvent(Event event) {
-		switch (event.eventType()){
-			case NimbleEvent.ENTER_IN_QUEUE:
-				resetTimeout();
-				break;
 
-			case NimbleEvent.LOOP_START:
+		if(Event.equalHash(event, NimbleEvent.ENTER_IN_QUEUE)){
+			resetTimeout();
+		}
 
-				if(isTimeout()){
-					if(connectionEvent != null){
-						connectionEvent.onConnectionClosed(connectionInfo);
-					}
-					outputEvents.pushEvent(new TcpConnectionEvent(TcpConnectionEvent.DISCONNECT, connectionInfo()));
-					return;
+		if(Event.equalHash(event, NimbleEvent.LOOP_START)){
+			if(isTimeout()){
+				dispatchDisconnect();
+				return;
+			}
+
+			readFromStream(inputStream, packetProcessor);
+			//read events for receiving packet
+			checkAndIO(packetProcessor.fromSocket(), IOAction.READ);
+			//read events for sending in socket
+			checkAndIO(packetProcessor.toSocket(), IOAction.WRITE);
+		}
+
+		if(Event.equalHash(event, TcpPacketEvent.TCP_PACKET_SEND)){
+			if(event instanceof TcpPacketEvent){
+
+				TcpPacketEvent packetEvent = ((TcpPacketEvent)event);
+
+				if(isSelfConnectionInfo(packetEvent.target())){
+					//adding bytes to packet processor for send-packing
+					addBytesToSend(packetEvent.bytes());
 				}
+			}
+		}
+	}
 
-				readFromStream(inputStream, packetProcessor);
-				//read events for receiving packet
-				checkAndIO(packetProcessor.fromSocket(), IOAction.READ);
-				//read events for sending in socket
-				checkAndIO(packetProcessor.toSocket(), IOAction.WRITE);
+	private Boolean isSelfConnectionInfo(TcpConnectionInfo ci){
+		return ci.connection_id() == connectionInfo().connection_id();
+	}
 
-				break;
-
-			case TcpPacketEvent.TCP_PACKET_SEND:
-				//adding bytes to packet processor for send-packing
-				addBytesToSend(((TcpPacketEvent)event).bytes());
-				break;
-
+	private void dispatchDisconnect(){
+		if(connectionEvent!=null){
+			connectionEvent.onConnectionClosed(connectionInfo());
+			outputEvents.pushEvent(TcpConnectionEvent.createDisconnect(connectionInfo));
 		}
 	}
 
@@ -102,37 +113,34 @@ public class TcpConnection implements EventIO.EventFull {
 			return;
 		}
 
-
+		//long time = System.currentTimeMillis();
 		byte[] raw_input = new byte[available];
 
 		int bytesCountReadFromStream;
 		try {
 			bytesCountReadFromStream = stream.read(raw_input);
 		} catch (IOException ioException) {
-			if(connectionEvent!=null){
-				connectionEvent.onConnectionClosed(connectionInfo);
-			}
+			dispatchDisconnect();
 			return;
 		}
 
 		if(bytesCountReadFromStream == -1){
-			if(connectionEvent!=null){
-				connectionEvent.onConnectionClosed(connectionInfo);
-			}
+			dispatchDisconnect();
 			return;
 		}
 
 		resetTimeout();
 		processor.addToProcessFromSocket(connectionInfo, raw_input);
+		//System.out.println("Read: "+(System.currentTimeMillis() - time));
 	}
 
 	private void addBytesToSend(byte[] bytes) {
 		packetProcessor.addToProcessToSocket(connectionInfo, bytes);
 	}
 
-	private void checkAndIO(EventIO.EventSender eventToSend, IOAction ioAction) {
-		if(eventToSend.hasEventToHandle()){
-			Event event = eventToSend.nextEvent();
+	private void checkAndIO(EventIO.EventSender eventProvider, IOAction ioAction) {
+		if(eventProvider.hasEventToHandle()){
+			Event event = eventProvider.nextEvent();
 
 			switch (ioAction) {
 				case READ:
@@ -140,15 +148,14 @@ public class TcpConnection implements EventIO.EventFull {
 					break;
 
 				case WRITE:
-					RawTcpPacketEvent rawTcpPacketEvent = (RawTcpPacketEvent)event;
-					if(rawTcpPacketEvent == null){
-						logger.logError("Received event with type '" + event.eventType() + "' has unexpected class type");
-						return;
+					if(event instanceof RawTcpPacketEvent){
+						RawTcpPacketEvent rawTcpPacketEvent = (RawTcpPacketEvent)event;
+						flushToSocket(rawTcpPacketEvent.bytes());
+					}else{
+						logger.logError("Event from 'PacketProcessor#toSocket' has unexpected type " + event.eventType() + "'");
 					}
-					flushToSocket(rawTcpPacketEvent.bytes());
 					break;
 			}
-
 		}
 	}
 
@@ -157,9 +164,7 @@ public class TcpConnection implements EventIO.EventFull {
 			outputStream.write(bytes);
 			outputStream.flush();
 		} catch (IOException e) {
-			if (connectionEvent != null) {
-				connectionEvent.onConnectionClosed(connectionInfo);
-			}
+			dispatchDisconnect();
 			return;
 		}
 		resetTimeout();

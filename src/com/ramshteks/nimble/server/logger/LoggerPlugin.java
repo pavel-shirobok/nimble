@@ -12,7 +12,7 @@ public abstract class LoggerPlugin implements EventReceiver{
 
 	@Override
 	public void pushEvent(Event event) {
-		if(LoggerEvent.LOG_MESSAGE.equals(event.eventType())){
+		if(Event.equalHash(event, LoggerEvent.LOG_MESSAGE)){
 			processLogEvent((LoggerEvent)event);
 		}
 	}

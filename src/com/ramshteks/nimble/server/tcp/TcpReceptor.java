@@ -67,7 +67,7 @@ public class TcpReceptor extends Receptor implements EventIO.EventFull, Runnable
 
 	@Override
 	public void pushEvent(Event event) {
-		if(NimbleEvent.CYCLE_STARTED.equals(event.eventType())){
+		if(Event.equalHash(event, NimbleEvent.CYCLE_STARTED)){
 			eventStack.pushEvent(new LoggerEvent(LogLevel.Message, "Server started", "TcpReceptor"));
 		}
 	}

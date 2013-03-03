@@ -9,7 +9,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-public class TcpConnectionsStack implements ITcpConnectionEvent{
+public class TcpConnectionsStack implements ITcpConnectionCallback {
 	private Hashtable<Integer, TcpConnection> connections;
 
 	private IPacketProcessorFactory packetProcessorFactory;
