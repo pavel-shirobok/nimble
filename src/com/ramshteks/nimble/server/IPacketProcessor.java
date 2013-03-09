@@ -1,7 +1,6 @@
 package com.ramshteks.nimble.server;
 
-import com.ramshteks.nimble.core.*;
-import com.ramshteks.nimble.server.tcp.*;
+import com.ramshteks.nimble.server.tcp.TcpConnectionInfo;
 
 /**
  * ...
@@ -10,10 +9,16 @@ import com.ramshteks.nimble.server.tcp.*;
  */
 public interface IPacketProcessor {
 
-	void addToProcessFromSocket(TcpConnectionInfo connectionInfo, byte[] bytes);
-	void addToProcessToSocket(TcpConnectionInfo connectionInfo, byte[] bytes);
+	void processBytesFromSocket(TcpConnectionInfo connectionInfo, byte[] bytes);
+	void processBytesToSocket(TcpConnectionInfo connectionInfo, byte[] bytes);
 
-	EventIO.EventSender toSocket();
-	EventIO.EventSender fromSocket();
+	boolean hasReceivedPacket();
+	boolean hasSendingPacket();
+
+	byte[] nextReceivedPacket();
+	byte[] nextPacketForSend();
+
+	/*ArrayList<byte[]> toSocket();
+	ArrayList<byte[]> fromSocket();*/
 }
 

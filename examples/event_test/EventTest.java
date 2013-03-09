@@ -1,3 +1,4 @@
+/*
 package event_test;
 
 import com.ramshteks.nimble.core.Event;
@@ -8,11 +9,13 @@ import com.ramshteks.nimble.core.NimbleEvent;
 import static com.ramshteks.nimble.core.EventIO.EventFull;
 import static com.ramshteks.nimble.core.EventIO.EventSender;
 
+*/
 /**
  * ...
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
- */
+ *//*
+
 public class EventTest {
 	public static void main(String[] args){
 		Nimble nimble = new Nimble();
@@ -97,3 +100,4 @@ public class EventTest {
 	}
 
 }
+*/

@@ -59,41 +59,6 @@ public class ServerStatistics implements EventIO.EventReceiver {
 			disconnectedCount++;
 			totalConnectionsCount--;
 		}
-
-		/*switch (event.eventType()){
-			case NimbleEvent.LOOP_START:
-				long newTime = System.currentTimeMillis();
-				if(newTime - lastLoopTime > 1000){
-					printStatistics();
-					clear();
-					lastLoopTime = newTime;
-				}
-				break;
-
-			case NimbleEvent.LOOP_END:
-
-				break;
-
-			case TcpPacketEvent.TCP_PACKET_SEND:
-				sendedPackets++;
-				totalSendedPackets++;
-				break;
-
-			case TcpPacketEvent.TCP_PACKET_RECV:
-				receivedPackets++;
-				totalReceivedPackets++;
-				break;
-
-			case TcpConnectionEvent.CONNECT:
-				newConnectionCount++;
-				totalConnectionsCount++;
-				break;
-
-			case TcpConnectionEvent.DISCONNECT:
-				disconnectedCount++;
-				totalConnectionsCount--;
-				break;
-		}*/
 	}
 
 	private void clear() {

@@ -7,7 +7,7 @@ import java.util.LinkedList;
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
  */
-public class EventStack implements EventIO.EventSender, EventIO.EventReceiver {
+public class EventStack implements EventIO.EventSender, EventIO.EventReceiver, EventIO.EventFull {
 	private LinkedList<Event> events;
 	public EventStack(){
 		events = new LinkedList<Event>();

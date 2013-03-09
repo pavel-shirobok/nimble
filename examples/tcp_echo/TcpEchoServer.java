@@ -1,3 +1,4 @@
+/*
 package tcp_echo;
 
 import com.ramshteks.nimble.core.Nimble;
@@ -9,11 +10,13 @@ import com.ramshteks.nimble.server.statistic.ServerStatistics;
 import java.io.IOException;
 import java.net.InetAddress;
 
+*/
 /**
  * ...
  *
  * @author Pavel Shirobok (ramshteks@gmail.com)
- */
+ *//*
+
 public class TcpEchoServer {
 
 	public static void main(String[] args){
@@ -55,3 +58,4 @@ public class TcpEchoServer {
 	}
 
 }
+*/
