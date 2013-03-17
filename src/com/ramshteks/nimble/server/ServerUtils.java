@@ -37,11 +37,11 @@ public class ServerUtils {
 
 		public synchronized void free(int id){
 			if(freeIDList.contains(id)){
-				throw new RuntimeException("This id="+id+" already free");
+				throw new RuntimeException("This id='"+id+"' already free");
 			}
 
 			if(!idToStatus.containsKey(id)){
-				throw new RuntimeException("This id="+id+" out of bounds");
+				throw new RuntimeException("This id='"+id+"' out of bounds");
 			}
 
 			freeIDList.addLast(id);

@@ -1,7 +1,7 @@
 package com.ramshteks.nimble.core;
 
 import java.util.LinkedList;
-
+import static com.ramshteks.nimble.core.Event.Priority.*;
 /**
  * ...
  *
@@ -9,12 +9,17 @@ import java.util.LinkedList;
  */
 public class EventStack implements EventIO.EventSender, EventIO.EventReceiver, EventIO.EventFull {
 	private LinkedList<Event> events;
+
 	public EventStack(){
-		events = new LinkedList<Event>();
+		events = new LinkedList<>();
 	}
 
 	public void pushEvent(Event event){
-		events.addFirst(event);
+		if(HIGH == event.priority()){
+			events.addLast(event);
+		}else{
+			events.addFirst(event);
+		}
 	}
 
 	public boolean hasEventToHandle(){

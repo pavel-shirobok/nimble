@@ -1,26 +1,13 @@
 package com.ramshteks.nimble.server.tcp_server;
 
-import com.ramshteks.nimble.core.Event;
-import com.ramshteks.nimble.core.EventIO;
-import com.ramshteks.nimble.core.EventStack;
-import com.ramshteks.nimble.core.NimbleEvent;
-import com.ramshteks.nimble.server.IPacketProcessor;
-import com.ramshteks.nimble.server.IPacketProcessorFactory;
-import com.ramshteks.nimble.server.Receptor;
-import com.ramshteks.nimble.server.ServerUtils;
-import com.ramshteks.nimble.server.tcp.TcpConnection;
-import com.ramshteks.nimble.server.tcp.TcpConnectionInfo;
-import com.ramshteks.nimble.server.tcp.TcpReceptor;
-import com.ramshteks.nimble.server.tcp.events.TcpConnectionEvent;
-import com.ramshteks.nimble.server.tcp.events.TcpPacketEvent;
+import com.ramshteks.nimble.core.*;
+import com.ramshteks.nimble.server.*;
+import com.ramshteks.nimble.server.tcp.*;
+import com.ramshteks.nimble.server.tcp.events.*;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 /**
  * ...
@@ -29,15 +16,15 @@ import java.util.Hashtable;
  */
 public class TcpServer implements EventIO.EventFull {
 	private final ArrayList<Socket> newSockets;
-	private Hashtable<Integer, TcpConnection> connections;
+	private final Hashtable<Integer, TcpConnection> connections;
 	private IPacketProcessorFactory packetProcessorFactory;
 	private ServerUtils.IDGenerator idGenerator;
+	@SuppressWarnings("FieldCanBeLocal")
 	private Receptor.ReceptorEvent receptorHandler;
 	private TcpConnection.TcpConnectionCallback connectionCallback;
 	private Receptor receptor;
 
 	private final EventIO.EventFull outputEvent;
-	private final EventIO.EventReceiver inputEvent;
 
 	public TcpServer(IPacketProcessorFactory packetProcessorFactory, ServerUtils.IDGenerator idGenerator) {
 		this.packetProcessorFactory = packetProcessorFactory;
@@ -45,11 +32,15 @@ public class TcpServer implements EventIO.EventFull {
 		newSockets = new ArrayList<>();
 		connections = new Hashtable<>();
 		outputEvent = new EventStack();
-		inputEvent = new EventStack();
 		receptorHandler = createRecepterEventHandler();
 		connectionCallback = createConnectionEventHandler();
-		receptor = new TcpReceptor();
-		receptor.addReceptorEvent(receptorHandler);
+		receptor = createReceptor(receptorHandler);
+	}
+
+	private TcpReceptor createReceptor(Receptor.ReceptorEvent receptorEvent){
+		TcpReceptor receptor = new TcpReceptor();
+		receptor.addReceptorEvent(receptorEvent);
+		return receptor;
 	}
 
 	@Override
@@ -73,47 +64,53 @@ public class TcpServer implements EventIO.EventFull {
 				if(newSockets.size() != 0){
 					Socket socket = newSockets.remove(newSockets.size() - 1);
 					TcpConnectionInfo connectionInfo = new TcpConnectionInfo(idGenerator.nextID());
-					TcpConnection newConnection = null;
-					IPacketProcessor packetProcessor = packetProcessorFactory.createNewInstance(connectionInfo);
+					TcpConnection newConnection;
+					PacketProcessor packetProcessor = packetProcessorFactory.createNewInstance(connectionInfo);
 
 					try{
 						newConnection = (new TcpConnection(socket, connectionInfo, packetProcessor, 1000));
 					}catch (Exception exception){
+						return;
+						//TODO:
+					}
 
-						//TODO:
-					}
-					if(newConnection == null){
-						//TODO:
-					}
 					newConnection.setConnectionEvent(connectionCallback);
 					connections.put(connectionInfo.connection_id(), newConnection);
-					outputEvent.pushEvent(new TcpConnectionEvent(TcpConnectionEvent.CONNECT, connectionInfo));
+					TcpConnectionEvent connectionEvent = TcpConnectionEvent.createConnect(connectionInfo);
+					dispatchEvent(connectionEvent);
 				}
 			}
 
-
-			Collection<TcpConnection> connectionCollection = connections.values();
-			for(TcpConnection connection: connectionCollection){
-				connection.doCycle();
+			Enumeration<TcpConnection> connectionCollection = connections.elements();
+			TcpConnection currentConnection;
+			while (connectionCollection.hasMoreElements()){
+				currentConnection = connectionCollection.nextElement();
+				currentConnection.doCycle();
 			}
 		}
 
 		if(Event.equalHash(event, TcpPacketEvent.TCP_PACKET_SEND)){
 			TcpPacketEvent packetEvent = (TcpPacketEvent)event;
 			TcpConnection connection = connections.get(packetEvent.target().connection_id());
-			connection.send(packetEvent.bytes());
+			if(connection!=null){
+				connection.send(packetEvent.bytes());
+			}
 		}
 	}
 
 	@Override
 	public boolean hasEventToHandle() {
-		return outputEvent.hasEventToHandle();
+		synchronized (outputEvent){
+			return outputEvent.hasEventToHandle();
+		}
 	}
 
 
 	@Override
 	public Event nextEvent() {
-		return outputEvent.nextEvent();
+		synchronized (outputEvent){
+			return outputEvent.nextEvent();
+		}
 	}
 
 	private Receptor.ReceptorEvent createRecepterEventHandler() {
@@ -137,23 +134,28 @@ public class TcpServer implements EventIO.EventFull {
 		};
 	}
 
+	private void dispatchEvent(Event event){
+		synchronized (outputEvent){
+			outputEvent.pushEvent(event);
+		}
+	}
+
 	private TcpConnection.TcpConnectionCallback createConnectionEventHandler() {
 		return new TcpConnection.TcpConnectionCallback() {
 			@Override
-			public void onDataSended(TcpConnectionInfo connectionInfo, byte[] bytes) {
-				outputEvent.pushEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_SEND, connectionInfo, bytes));
+			public void onDataSend(TcpConnectionInfo connectionInfo, byte[] bytes) {
+				dispatchEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_SEND, connectionInfo, bytes));
 			}
 
 			@Override
 			public void onDataReceived(TcpConnectionInfo connectionInfo, byte[] bytes) {
-				outputEvent.pushEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_RECV, connectionInfo, bytes));
-
+				dispatchEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_RECV, connectionInfo, bytes));
 			}
 
 			@Override
 			public void onConnectionClosed(TcpConnectionInfo connectionInfo) {
 				connections.remove(connectionInfo.connection_id());
-				outputEvent.pushEvent((TcpConnectionEvent.createDisconnect(connectionInfo)));
+				dispatchEvent(TcpConnectionEvent.createDisconnect(connectionInfo));
 			}
 
 			@Override

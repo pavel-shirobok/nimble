@@ -5,6 +5,10 @@ import com.ramshteks.nimble.server.ServerUtils;
 import java.util.HashMap;
 
 public class Event{
+	public static enum Priority{
+		HIGH, COMMON
+	}
+
 	private static HashMap<String, Integer> typeToIntegerIdentifier;
 	private static ServerUtils.IDGenerator idGenerator;
 
@@ -30,12 +34,22 @@ public class Event{
 
 	private String eventType;
 	private int hashCode;
+	private Priority priority = Priority.COMMON;
 
 	public Event(String eventType){
 		this.eventType = eventType;
 		hashCode = getOrCreateHashCode(eventType);
 	}
 
+	public final Priority priority(){
+		return priority;
+	}
+
+	public void setHighPriority(){
+		priority = Priority.HIGH;
+	}
+
+	@SuppressWarnings("UnusedDeclaration")
 	public final String eventType() {
 		return eventType;
 	}

@@ -1,15 +1,12 @@
 package com.ramshteks.nimble.server.tcp;
 
-import com.ramshteks.nimble.server.IPacketProcessor;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
+import com.ramshteks.nimble.server.*;
+import java.io.*;
+import java.net.*;
 
 public class TcpConnection {
 	public static interface TcpConnectionCallback{
-		void onDataSended(TcpConnectionInfo connectionInfo, byte[] bytes);
+		void onDataSend(TcpConnectionInfo connectionInfo, byte[] bytes);
 		void onDataReceived(TcpConnectionInfo connectionInfo, byte[] bytes);
 		void onConnectionClosed(TcpConnectionInfo connectionInfo);
 		void onError(Exception error, String message);
@@ -20,13 +17,13 @@ public class TcpConnection {
 
 	private Socket socket;
 	private TcpConnectionInfo connectionInfo;
-	private IPacketProcessor packetProcessor;
+	private PacketProcessor packetProcessor;
 	private OutputStream outputStream;
 	private InputStream inputStream;
 	private long timeout;
 	private long lastTime;
 
-	public TcpConnection(Socket socket, TcpConnectionInfo connectionInfo, IPacketProcessor packetProcessor, int timeout) throws IOException{
+	public TcpConnection(Socket socket, TcpConnectionInfo connectionInfo, PacketProcessor packetProcessor, int timeout) throws IOException{
 
 		this.socket = socket;
 		this.connectionInfo = connectionInfo;
@@ -64,10 +61,9 @@ public class TcpConnection {
 
 		if(writtenBytes!=null){
 			if(connectionEvent!=null){
-				connectionEvent.onDataSended(connectionInfo(), writtenBytes);
+				connectionEvent.onDataSend(connectionInfo(), writtenBytes);
 			}
 		}
-
 	}
 
 	private byte[] tryWriteToSocket() {
@@ -136,6 +132,7 @@ public class TcpConnection {
 		resetTimeout();
 	}
 
+	@SuppressWarnings("UnusedDeclaration")
 	public void close() {
 
 		try {

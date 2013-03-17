@@ -24,7 +24,15 @@ public class TcpConnectionEvent extends Event {
 		return connectionInfo;
 	}
 
+	public static TcpConnectionEvent createConnect(TcpConnectionInfo connectionInfo){
+		TcpConnectionEvent event = new TcpConnectionEvent(CONNECT, connectionInfo);
+		event.setHighPriority();
+		return event;
+	}
+
 	public static TcpConnectionEvent createDisconnect(TcpConnectionInfo connectionInfo){
-		return new TcpConnectionEvent(DISCONNECT, connectionInfo);
+		TcpConnectionEvent event = new TcpConnectionEvent(DISCONNECT, connectionInfo);
+		event.setHighPriority();
+		return event;
 	}
 }
