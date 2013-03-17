@@ -5,19 +5,27 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 public abstract class Receptor {
-	public static interface ReceptorEvent{
+	public static interface ReceptorCallback {
+
 		void onAcceptedSocket(Socket socket);
 		void onError(Exception exception, String message);
 		void onWarning(String string);
 	}
 
-	private ReceptorEvent eventHandler;
+	protected ReceptorCallback eventHandler;
+	protected InetAddress inetAddress;
+	protected int port;
 
-	public abstract void startBinding(InetAddress bindAddress, int port) throws IOException;
+	public abstract void startBinding() throws IOException;
 	public abstract void stopBinding() throws IOException;
 	public abstract boolean bindStarted();
 
-	public void addReceptorEvent(ReceptorEvent eventHandler){
+	public void setBindAddress(InetAddress inetAddress, int port){
+		this.inetAddress = inetAddress;
+		this.port = port;
+	}
+
+	public void addReceptorEvent(ReceptorCallback eventHandler){
 		this.eventHandler = eventHandler;
 	}
 

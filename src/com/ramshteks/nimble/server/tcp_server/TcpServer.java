@@ -20,42 +20,42 @@ public class TcpServer implements EventIO.EventFull {
 	private IPacketProcessorFactory packetProcessorFactory;
 	private ServerUtils.IDGenerator idGenerator;
 	@SuppressWarnings("FieldCanBeLocal")
-	private Receptor.ReceptorEvent receptorHandler;
+	private Receptor.ReceptorCallback receptorHandler;
 	private TcpConnection.TcpConnectionCallback connectionCallback;
-	private Receptor receptor;
+	//private Receptor receptor;
 
 	private final EventIO.EventFull outputEvent;
+
+	private LinkedList<TcpReceptor> receptors;
 
 	public TcpServer(IPacketProcessorFactory packetProcessorFactory, ServerUtils.IDGenerator idGenerator) {
 		this.packetProcessorFactory = packetProcessorFactory;
 		this.idGenerator = idGenerator;
+
 		newSockets = new ArrayList<>();
 		connections = new Hashtable<>();
 		outputEvent = new EventStack();
+		receptors = new LinkedList<>();
+
 		receptorHandler = createRecepterEventHandler();
 		connectionCallback = createConnectionEventHandler();
-		receptor = createReceptor(receptorHandler);
 	}
 
-	private TcpReceptor createReceptor(Receptor.ReceptorEvent receptorEvent){
-		TcpReceptor receptor = new TcpReceptor();
-		receptor.addReceptorEvent(receptorEvent);
-		return receptor;
+	public void addReceptor(TcpReceptor receptor, InetAddress inetAddress, int port){
+		receptor.addReceptorEvent(receptorHandler);
+		receptor.setBindAddress(inetAddress, port);
+		receptors.add(receptor);
 	}
 
 	@Override
 	public void pushEvent(Event event) {
 		if(Event.equalHash(event, NimbleEvent.ENTER_IN_QUEUE)){
-			InetAddress inetAddress = null;
-			try {
-				inetAddress = InetAddress.getByName("localhost") ;
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
-			try {
-				receptor.startBinding(inetAddress, 2305);
-			} catch (IOException e) {
-				e.printStackTrace();
+			for(TcpReceptor tcpReceptor: receptors){
+				try{
+					tcpReceptor.startBinding();
+				}catch (IOException ioException){
+					//TODO:
+				}
 			}
 		}
 
@@ -113,8 +113,8 @@ public class TcpServer implements EventIO.EventFull {
 		}
 	}
 
-	private Receptor.ReceptorEvent createRecepterEventHandler() {
-		return new Receptor.ReceptorEvent() {
+	private Receptor.ReceptorCallback createRecepterEventHandler() {
+		return new Receptor.ReceptorCallback() {
 			@Override
 			public void onAcceptedSocket(Socket socket) {
 				synchronized (newSockets){

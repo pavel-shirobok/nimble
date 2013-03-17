@@ -20,13 +20,13 @@ public class TcpReceptor extends Receptor implements Runnable {
 	public TcpReceptor() {}
 
 	@Override
-	public void startBinding(InetAddress bindAddress, int port) throws IOException {
+	public void startBinding() throws IOException {
 		if(isSocketBind){
 			throw new IOException("Address already bind");
 		}
 		isSocketBind = true;
 
-		socket = new ServerSocket(port, 0, bindAddress);
+		socket = new ServerSocket(port, 0, inetAddress);
 		createAndStartThread();
 	}
 
