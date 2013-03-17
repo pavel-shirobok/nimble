@@ -1,55 +1,42 @@
-/*
 package tcp_echo;
 
-import com.ramshteks.nimble.core.EventIO;
-import com.ramshteks.nimble.core.EventStack;
-import com.ramshteks.nimble.server.IPacketProcessor;
+import com.ramshteks.nimble.server.PacketProcessor;
 import com.ramshteks.nimble.server.IPacketProcessorFactory;
 import com.ramshteks.nimble.server.tcp.TcpConnectionInfo;
-import com.ramshteks.nimble.server.tcp.events.RawTcpPacketEvent;
-import com.ramshteks.nimble.server.tcp.events.TcpPacketEvent;
 
-import java.io.ByteArrayOutputStream;
-
-*/
 /**
  * ...
  *
- * @author Pavel Shirobok (ramshteks@gmail.com)
- *//*
+ * @author Pavel Shirobok (ramshteks@gmail.com)*/
 
-public class EchoPacketProcessor implements IPacketProcessor{
+
+public class EchoPacketProcessor extends PacketProcessor {
 	public static final IPacketProcessorFactory factory = new IPacketProcessorFactory() {
 		@Override
-		public IPacketProcessor createNewInstance(TcpConnectionInfo connectionInfo) {
+		public PacketProcessor createNewInstance(TcpConnectionInfo connectionInfo) {
 			return new EchoPacketProcessor();
 		}
 	};
 
-	private EventStack toSocket = new EventStack();
-	private EventStack fromSocket = new EventStack();
+	public EchoPacketProcessor() {
+		super();
+	}
 
 	@Override
 	public void processBytesFromSocket(TcpConnectionInfo connectionInfo, byte[] bytes) {
-		fromSocket.pushEvent(new TcpPacketEvent(TcpPacketEvent.TCP_PACKET_RECV, connectionInfo, bytes));
+		pushSendPacket(getUTFStringBytes("Hello, world"));
 	}
-
 
 	@Override
 	public void processBytesToSocket(TcpConnectionInfo connectionInfo, byte[] bytes) {
-		RawTcpPacketEvent rawTcpPacketEvent;
-		rawTcpPacketEvent = new RawTcpPacketEvent(RawTcpPacketEvent.RAW_TCP_PACKET_TO_SEND, bytes);
-		toSocket.pushEvent(rawTcpPacketEvent);
+		pushSendPacket(bytes);
 	}
 
-	@Override
-	public EventIO.EventSender toSocket() {
-		return toSocket;
-	}
-
-	@Override
-	public EventIO.EventSender fromSocket() {
-		return fromSocket;
+	public  static byte[] getUTFStringBytes(String string){
+		byte[] say_bytes = null;
+		try{
+			say_bytes = string.getBytes("UTF-8");
+		}catch (Exception e){}
+		return say_bytes;
 	}
 }
-*/
