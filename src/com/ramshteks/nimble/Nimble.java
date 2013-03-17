@@ -1,8 +1,8 @@
-package com.ramshteks.nimble.core;
+package com.ramshteks.nimble;
 
 import java.util.ArrayList;
 
-import static com.ramshteks.nimble.core.EventIO.*;
+import static com.ramshteks.nimble.EventIO.*;
 
 
 public class Nimble implements Runnable {

@@ -1,7 +1,7 @@
-package com.ramshteks.nimble.core;
+package com.ramshteks.nimble;
 
 import java.util.LinkedList;
-import static com.ramshteks.nimble.core.Event.Priority.*;
+import static com.ramshteks.nimble.Event.Priority.*;
 /**
  * ...
  *

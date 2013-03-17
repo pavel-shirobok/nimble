@@ -1,6 +1,6 @@
-package com.ramshteks.nimble.core;
+package com.ramshteks.nimble;
 
-import com.ramshteks.nimble.server.ServerUtils;
+import com.ramshteks.nimble.plugins.net.IDGenerator;
 
 import java.util.HashMap;
 
@@ -10,11 +10,11 @@ public class Event{
 	}
 
 	private static HashMap<String, Integer> typeToIntegerIdentifier;
-	private static ServerUtils.IDGenerator idGenerator;
+	private static IDGenerator idGenerator;
 
 	static {
 		typeToIntegerIdentifier = new HashMap<>();
-		idGenerator = new ServerUtils.IDGenerator(0, 1000);
+		idGenerator = new IDGenerator(0, 1000);
 	}
 
 	public static int getHashCodeOfEventType(String eventType){

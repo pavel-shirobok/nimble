@@ -1,4 +1,4 @@
-package com.ramshteks.nimble.core;
+package com.ramshteks.nimble;
 
 /**
  * ...
