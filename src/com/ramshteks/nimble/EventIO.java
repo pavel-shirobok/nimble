@@ -40,4 +40,8 @@ public interface EventIO{
 		Event nextEvent();
 	}
 
+	public static interface EventHandler{
+		void handle(Event event);
+	}
+
 }

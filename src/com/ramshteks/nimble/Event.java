@@ -32,6 +32,7 @@ import com.ramshteks.nimble.plugins.net.IDGenerator;
 import java.util.HashMap;
 
 public class Event{
+
 	public static enum Priority{
 		HIGH, COMMON
 	}
